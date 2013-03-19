@@ -1,0 +1,276 @@
+<html>
+	<head>
+		<meta http-equiv="Cache-Control" content="no-cache">
+		<meta http-equiv='Content-Type'  content='text/html; charset=utf-8'>
+
+		<style type="text/css">
+			body
+			{
+				margin: 0; /* margin and padding only necessary to cater for Mac IE5 */
+				padding: 0;
+				/*\*/	overflow: hidden; /* because Mac IE5 don't understand */
+			}
+			div
+			{
+				margin: 0;
+				padding: 0;
+			}
+			#content
+			{
+				/*\*/
+				position: absolute;
+				top:      5px;
+				right:    5px;
+				bottom:   5px;
+				left:     200px;
+				/* Exclude all previous props for Mac IE5 */
+				margin:   5px 5px 5px 200px; /* Cater for Mac IE5 */
+				/*\*/ margin: 0; /* Put back for all the rest */
+				/*\*/ overflow: auto; /* no need for Mac IE5 to see this */
+			}
+			#siteList
+			{
+				position: absolute;
+				top:      5;
+				bottom:   5;
+				left:     5;
+				width:    190px;
+				overflow: auto;
+			}
+
+			body { background: #666666; }
+			#content { background: #ffffff; }
+			#siteList { background: #ffffff; }
+		</style>
+		<!--[if lt IE 7]>
+		<style type="text/css" media="screen">
+			/* let the IE expressions commence */
+			#sidebar
+			{
+				height: expression(document.body.clientHeight + "px");
+			}
+			#content
+			{
+				height: expression(document.body.clientHeight - (100 + 120 + (2 * 5)) + "px");
+				width: expression(document.body.clientWidth - (200 + 300 + (2 * 5)) + "px");
+			}
+		</style>
+		<![endif]-->
+
+		 <script type="text/javascript" src="jquery-1.9.1.min.js"></script>          
+		 <script type="text/javascript" src="waypoints.min.js"></script>          
+		 <script type="text/javascript"> 
+
+		 	function decreaseCount(siteName)
+		 	{
+		 		for (var f = 0; f < 2; f++)
+		 		{
+					var counter = $('#counter' + siteName);
+					var count   = counter.attr('unreadCount') - 1;
+					counter.attr('unreadCount', count);
+					counter.text(' (' + count + ')');
+					siteName = 'All';
+				}
+		 	}
+
+		 	function nextPage()
+		 	{
+		 		//TODO: show a 'please wait' message here
+		 		//TODO: count how many times this has been called. If it's taking longer than e.g., 10 seconds, then stop trying and show an error message
+		 		var pending = parseInt($('#content').attr('pendingMarks'));
+		 		if (pending > 0)
+		 			setTimeout(nextPage, 200);
+		 		else
+		 			loadItems($('#content').attr('currentSiteId'));
+		 	}
+
+		    function loadItems(siteId)
+		 	{
+		 		currentSiteId = $('#content').attr('currentSiteId');
+		 		$('#content').empty();
+
+		 		$('#content').attr('currentSiteId', siteId);
+
+				$.post("getItems.php",
+				{
+					id         : siteId,
+					maxItems   : 10,
+				},
+				function(data, status) {
+					data = jQuery.parseJSON(data);
+					if (!data || !data.items || !data.items.length)
+					{
+						var div = $("<div>").text('Nothing to see here.');
+						$("#content").append(div);
+						return;
+					}
+
+					for (var x = 0; x < data.items.length; x++)
+					{
+						var div = $("<div>");
+						var title = $("<a>").text(data.items[x].siteId + ': ' + data.items[x].title);
+						title.attr('href', data.items[x].source);
+						var when  =  $("<b>").text(data.items[x].timestamp);
+						var contents = $("<div>").html(data.items[x].contents);
+						div.append(when);
+						div.append($("<br>"));
+						div.append(title);
+						div.append($("<br>"));
+						div.append(contents);
+						$("#content").append(div);
+
+						var hr = $("<hr>");
+						var itemName = 'item' + data.items[x].itemId;
+						hr.attr('id', itemName);
+						hr.attr('itemId', data.items[x].itemId);
+						hr.attr('siteId', data.items[x].siteId);
+						$("#content").append(hr);
+
+						$(hr).waypoint(function() {
+							$('#content').attr('pendingMarks', parseInt($('#content').attr('pendingMarks')) + 1);
+
+						    id = $(this).attr('itemId');
+						    //should move this into the complete() function callback
+						    decreaseCount($(this).attr('siteId'));
+						    //
+							$.post("markItem.php",
+							{
+								itemId:id,
+								action:'read'
+							}, function() {
+								$('#content').attr('pendingMarks', parseInt($('#content').attr('pendingMarks')) - 1);
+							});
+						}, { context: '.contents', triggerOnce: true });
+					}
+
+					//next item set loader waypoint
+					var nextPageDiv = $("<div>").text('The next items will load when this hits the top of the window...');
+					nextPageDiv.attr('id', 'nextPageDiv');
+					$("#content").append(nextPageDiv);
+					$('#nextPageDiv').waypoint(function() {
+						window.setTimeout(nextPage, 100);
+					}, { context: '.contents', triggerOnce: true });
+
+					//padding at the bottom to enable the HR of the last item to hit the top of the screen and trigger it being read
+					var footerDiv = $("<div>").css('height','100%');
+					footerDiv.attr('id', 'footerDiv');
+					$("#content").append(footerDiv);
+				});
+		 	}
+
+		 	function disableWayPoints()
+		 	{
+		 		$('#content hr').each( function(index, element) {
+		 			$(this).waypoint('destroy');
+		 		});
+		 		$('#nextPageDiv').waypoint('destroy');
+		 	}
+
+		 	function addSiteToList(siteName, siteId, siteUnread)
+		 	{
+				var div  = $("<div>");
+				var link = $("<a>").text(siteName);
+				link.attr('href', '#' + siteId);
+				link.click(function() {
+					disableWayPoints();
+					var href = $(this).attr('href');
+					loadItems(href.substring(1));
+				});
+
+				var counter = $('<span>').text(' (' + siteUnread + ')');
+				counter.attr('id', 'counter' + siteName);
+				counter.attr('unreadCount', siteUnread);
+
+				div.append(link);
+				div.append(counter);
+				div.append($("<br>"))
+
+				$("#sites").append(div);
+		 	}
+
+		 	function loadSites()
+		 	{
+				$.post("getSites.php",
+				function(data, status) {
+					addSiteToList('All', -1, 0);
+
+					var br  = $('<br>');
+					var div = $('<div>').text('Subscriptions');
+					$('#sites').append(br);
+					$('#sites').append(br);
+					$('#sites').append(div);
+
+					var totalUnread = 0;
+					data = jQuery.parseJSON(data);
+					if (data && data.sites && data.sites.length)
+					{
+						for (var x = 0; x < data.sites.length; x++)
+						{
+							addSiteToList(data.sites[x].siteName, data.sites[x].siteId, data.sites[x].unread);
+							totalUnread += parseInt(data.sites[x].unread);
+						}
+					}					
+					$('#counterAll').attr('unreadCount', totalUnread);
+					$('#counterAll').text(' (' + totalUnread + ')');
+				});
+		 	}
+
+			$(document).ready(function() {
+		 		$('#content').attr('currentSiteId', -2);
+		 		$('#content').attr('pendingMarks', 0);
+
+				loadSites();
+				loadItems(-1);
+
+				//and now for the Ugly Twins...
+				$("#siteName").focus(function() {
+					var value = $(this).attr('value');
+					if (value == 'Site Name')
+						$(this).attr('value', '');
+				});
+				$("#siteSource").focus(function() {
+					var value = $(this).attr('value');
+					if (value == 'Feed URL')
+						$(this).attr('value', '');
+				});
+
+				$("#addSite").click(function() {
+					title = $("#siteName").val();
+					url   = $("#siteSource").val();
+					$.post("addSite.php",
+					{
+						siteName:title,
+						siteSource:url
+					}, function(data) {
+						data = jQuery.parseJSON(data);
+						addSiteToList(data.site.name, data.site.id, data.site.unread);
+						loadItems(data.site.id);
+						var totalUnread = parseInt($('#counterAll').attr('unreadCount'));
+						totalUnread += data.site.unread;
+						$('#counterAll').attr('unreadCount', totalUnread);
+						$('#counterAll').text(' (' + totalUnread + ')');
+					});
+				});
+
+   			});
+ 			
+		 </script> 
+	</head>
+	<body>
+		<div id='siteList'>
+			<div id='sites'>
+			</div>
+			<br />
+			<br />
+			<div id='addSiteDiv'>
+				<form method='post' id='addForm'>
+					<input id='siteName' type='TEXT' value='Site Name'/><br />
+					<input id='siteSource' type='TEXT' value='Feed URL'/><br />
+					<a id='addSite' href='#'>Add</a>
+				</form>
+			</div>
+		</div>
+		<div id='content' class='contents'>
+		</div>
+	</body>
+</html>
