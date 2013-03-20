@@ -37,6 +37,11 @@
 				width:    190px;
 				overflow: auto;
 			}
+			div.statusMessage
+			{
+				overflow: auto;
+				background: #aaaaff;
+			}
 
 			body { background: #666666; }
 			#content { background: #ffffff; }
@@ -108,11 +113,32 @@
 					for (var x = 0; x < data.items.length; x++)
 					{
 						var div = $("<div>");
+						
 						var title = $("<a>").text(data.items[x].siteId + ': ' + data.items[x].title);
 						title.attr('href', data.items[x].source);
+						
 						var when  =  $("<b>").text(data.items[x].timestamp);
+
+						var saveLink = $("<a>").text("[save destination page]");
+						saveLink.attr('href', '#');
+						saveLink.attr('class', 'saveLink');
+						saveLink.attr('itemId', data.items[x].itemId);
+						saveLink.click( function() {
+							var id = parseInt($(this).attr('itemId'));
+							$.post("savePage.php",
+							{
+								itemId: id
+							}, function(data) {
+								var div = $('<div>').html(data);
+								div.attr('class', 'statusMessage');
+								$('#status').append(div);
+							});
+						});
+
 						var contents = $("<div>").html(data.items[x].contents);
+
 						div.append(when);
+						div.append(saveLink);
 						div.append($("<br>"));
 						div.append(title);
 						div.append($("<br>"));
@@ -268,6 +294,11 @@
 					<input id='siteSource' type='TEXT' value='Feed URL'/><br />
 					<a id='addSite' href='#'>Add</a>
 				</form>
+			</div>
+			<br />
+			<br />
+			<div id='status'>
+				Messages:<br />
 			</div>
 		</div>
 		<div id='content' class='contents'>

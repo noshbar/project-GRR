@@ -18,6 +18,7 @@ However, this is my first real attempt at using jQuery and HTML5 and the magic a
 * Allows adding of multiple sites
 * Marks items as read once they leave the screen through scrolling
 * Stores every news item permanently so you can search it later on when you think "Where did I see that posted again...?"
+* If wkhtmltopdf is installed, you can save items to PDF from the main item page
 
 #Features (TODO)
 
@@ -26,6 +27,7 @@ However, this is my first real attempt at using jQuery and HTML5 and the magic a
 - [ ] Add the ability to save the contents of an entry to disk (i.e., fetch the page the news item points to, along with all its resources and save it to disk)
 - [ ] Add the ability to filter out posts containing keywords (e.g., "batman,spoilers")
 - [ ] Be able to flag posts as important if they contain specified keywords (e.g., "chris brown,horrific accident")
+- [ ] Be able to mail saved articles to people (mailto: Mr. Kindle)
 
 #Bugs
 
@@ -37,8 +39,9 @@ However, this is my first real attempt at using jQuery and HTML5 and the magic a
 
 This is focussed on a "personal server" kind of scenario so far, but nothing should stop you from running it on a website that supports SQLite and cURL usage.
 
-1. Have a cron job run update.php every oooh, 30 minutes or so? Or make it a link that you call on your webserver. It's just important that this script runs as often as your favourite websites update their feeds.
-2. Open index.html in a browser and away you go!
+So install a webserver with PHP 5 and SQLite support, put all the files in a folder e.g., /var/www/arsse, and open a browser to e.g., http://localhost/arsse/index.html
+
+To actually perform updates of content, have a cron job run update.php every oooh, 30 minutes or so? Or make it a link that you call on your webserver. It's just important that this script runs as often as your favourite websites update their feeds.
 
 #Technologies used:
 
@@ -47,3 +50,4 @@ This is focussed on a "personal server" kind of scenario so far, but nothing sho
 * jQuery 1.9.1 (http://jquery.com/)
 * jQuery Waypoints - v2.0.2 (https://github.com/imakewebthings/jquery-waypoints/blob/master/licenses.txt)
 * RSS for PHP (http://phpfashion.com/)
+* wkhtmltopdf (https://code.google.com/p/wkhtmltopdf/)
