@@ -4,26 +4,28 @@ require_once 'database.php';
 $maxItems = 10;
 if (isset($_POST['maxItems']))
     $maxItems = $_POST['maxItems'];
-$itemOffset = 0;
-if (isset($_POST['itemOffset']))
-    $itemOffset = $_POST['itemOffset'];
 
 $db             = openDatabase('test.db');
 $parameters     = array();
 $query          = 'SELECT item.id, site.name, item.source, item.timestamp, contents.title, contents.body FROM site, item, contents WHERE read=0 AND item.deleted=0 AND site.id=item.siteId AND contents.docid=item.contentId';
-if (isset($_POST['id']) && ($_POST['id'] != -1))
+if (isset($_POST['site']) && ($_POST['site'] != -1))
 {
 	$query .= ' AND item.siteId=?';
-	$parameters[0] = $_POST['id'];
+	array_push($parameters, $_POST['site']);
+}
+if (isset($_POST['itemId']) && ($_POST['itemId'] != -1))
+{
+	$query .= ' AND item.id=?';
+	array_push($parameters, $_POST['itemId']);
 }
 if (isset($_POST['lastId']) && ($_POST['lastId'] != -1))
 {
 	$query .= ' AND item.id<=?';
-	$parameters[1] = $_POST['lastId'];
+	array_push($parameters, $_POST['lastId']);
 }
 
-$query .= ' ORDER BY timestamp ASC LIMIT '.$maxItems;//.' OFFSET '.$itemOffset; <- this is taken care of by things marking themselves as read
-error_log("$query");
+$query .= ' ORDER BY timestamp ASC LIMIT '.$maxItems;
+
 $prepared = $db->prepare($query);
 $prepared->execute($parameters);
 $rows = $prepared->fetchAll(); 

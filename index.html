@@ -132,7 +132,7 @@
 
 				$.post("getItems.php",
 				{
-					id         : siteId,
+					site       : siteId,
 					lastId     : lastItemId,
 					maxItems   : 10,
 				},
@@ -276,8 +276,96 @@
 					}					
 					$('#counterAll').attr('unreadCount', totalUnread);
 					$('#counterAll').attr('lastItemId', data.lastItemId);
-					console.log("last id = " + data.lastItemId);
 					$('#counterAll').text(' (' + totalUnread + ')');
+				});
+		 	}
+
+		 	function search(term)
+		 	{
+		 		$("#searchResults").empty();
+		 		$('#content').empty();
+		 		$('#content').attr('currentSiteId', -1);
+
+				$.post("search.php",
+				{
+					searchTerm:term
+				}, function(data) {
+					data = decodeJSON(data);
+					if (!data || !data.items || !data.items.length)
+					{
+						var div = $("<div>").text('No results returned.');
+						$("#searchResuls").append(div);
+						return;
+					}
+
+					for (var x = 0; x < data.items.length; x++)
+					{
+						var div      = $("<div>");
+						var linkText = data.items[x].site + ': ' + data.items[x].title;
+						var showItem = $("<a>").text(linkText);
+
+						div.append(showItem);
+						$("#searchResults").append($("<br />"));
+						$("#searchResults").append(div);
+
+						showItem.attr('href', '#');
+						showItem.attr('itemId', data.items[x].itemId);
+						showItem.click( function() {
+					 		$('#content').empty();
+							var id = parseInt($(this).attr('itemId'));
+							$.post("getItems.php",
+							{
+								itemId: id
+							}, function(data) {
+								data = decodeJSON(data);
+								if (!data || !data.items || !data.items.length)
+								{
+									var div = $("<div>").text('Something went wrong.');
+									$("#content").append(div);
+									return;
+								}
+
+								for (var x = 0; x < data.items.length; x++)
+								{
+									var div      = $("<div>");
+									div.attr('class', 'contentItem');
+									
+									var title    = $("<a>").text(data.items[x].siteId + ': ' + data.items[x].title);
+									title.attr('href', data.items[x].source);
+									
+									var when     = $("<b>").text(data.items[x].timestamp + "   ");
+
+									var saveText = $("<sup>").text("[save destination page]");
+									var saveLink = $("<a>").text("");
+									saveLink.append(saveText);
+									saveLink.attr('href', '#');
+									saveLink.attr('class', 'saveLink');
+									saveLink.attr('itemId', data.items[x].itemId);
+									saveLink.click( function() {
+										var id = parseInt($(this).attr('itemId'));
+										$.post("savePage.php",
+										{
+											itemId: id
+										}, function(data) {
+											data = decodeJSON(data);
+											if (data)
+												addStatusMessage(data.message);
+										});
+									});
+
+									var contents = $("<div>").html(data.items[x].contents);
+
+									div.append(when);
+									div.append(saveLink);
+									div.append($("<br>"));
+									div.append(title);
+									div.append($("<br>"));
+									div.append(contents);
+									$("#content").append(div);
+								}
+							});
+						});
+					}
 				});
 		 	}
 
@@ -288,7 +376,7 @@
 				loadSites();
 				loadItems(-1);
 
-				//and now for the Ugly Twins...
+				//and now for the Ugly Triplets...
 				$("#siteName").focus(function() {
 					var value = $(this).attr('value');
 					if (value == 'Site Name')
@@ -297,6 +385,11 @@
 				$("#siteSource").focus(function() {
 					var value = $(this).attr('value');
 					if (value == 'Feed URL')
+						$(this).attr('value', '');
+				});
+				$("#searchTerm").focus(function() {
+					var value = $(this).attr('value');
+					if (value == 'Search Term')
 						$(this).attr('value', '');
 				});
 
@@ -322,6 +415,11 @@
 					});
 				});
 
+				$("#search").click(function() {
+					searchTerm = $("#searchTerm").val();
+					search(searchTerm)
+				});
+
    			});
  			
 		 </script> 
@@ -345,6 +443,15 @@
 				Messages: <a id='clearMessages' href='#'><sup>(clear all)</sup></a><br />
 				<div id='messages'>
 				</div>
+			</div>
+			<br />
+			<br />
+			<div id='searchPanel'>
+				<div id='searchTitle'>
+					<input id='searchTerm' type='TEXT' value='Search Term'/><br />
+					<a id='search' href='#'>Search</a>
+				</div>
+				<div id='searchResults'></div>
 			</div>
 		</div>
 		<div id='content' class='contents'>
