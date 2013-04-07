@@ -17,6 +17,11 @@ if (isset($_POST['id']) && ($_POST['id'] != -1))
 	$query .= ' AND item.siteId=?';
 	$parameters[0] = $_POST['id'];
 }
+if (isset($_POST['lastId']) && ($_POST['lastId'] != -1))
+{
+	$query .= ' AND item.id<=?';
+	$parameters[1] = $_POST['lastId'];
+}
 
 $query .= ' ORDER BY timestamp ASC LIMIT '.$maxItems;//.' OFFSET '.$itemOffset; <- this is taken care of by things marking themselves as read
 

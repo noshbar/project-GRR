@@ -95,10 +95,12 @@
 		 		$('#content').empty();
 
 		 		$('#content').attr('currentSiteId', siteId);
+		 		lastItemId = $('#counterAll').attr('lastItemId');
 
 				$.post("getItems.php",
 				{
 					id         : siteId,
+					lastId     : lastItemId,
 					maxItems   : 10,
 				},
 				function(data, status) {
@@ -237,6 +239,8 @@
 						}
 					}					
 					$('#counterAll').attr('unreadCount', totalUnread);
+					$('#counterAll').attr('lastItemId', data.lastItemId);
+					console.log("last id = " + data.lastItemId);
 					$('#counterAll').text(' (' + totalUnread + ')');
 				});
 		 	}
