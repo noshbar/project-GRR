@@ -122,6 +122,47 @@
 				return null;
 		 	}
 
+		 	function itemToDiv(item)
+		 	{
+				var div      = $("<div>");
+				div.attr('class', 'contentItem');
+				
+				var title    = $("<a>").text(item.siteId + ': ' + item.title);
+				title.attr('href', item.source);
+				
+				var when     = $("<b>").text(item.timestamp + "   ");
+
+				var saveText = $("<sup>").text("[save destination page]");
+				var saveLink = $("<a>").text("");
+				saveLink.append(saveText);
+				saveLink.attr('href', '#');
+				saveLink.attr('class', 'saveLink');
+				saveLink.attr('itemId', item.itemId);
+				saveLink.click( function() {
+					var id = parseInt($(this).attr('itemId'));
+					$.post("savePage.php",
+					{
+						itemId: id
+					}, function(data) {
+						data = decodeJSON(data);
+						if (data)
+							addStatusMessage(data.message);
+					});
+				});
+
+				var contents = $("<div>").html(item.contents);
+
+				div.append(when);
+				div.append(saveLink);
+				div.append($("<br>"));
+				div.append(title);
+				div.append($("<br>"));
+				div.append(contents);
+				$("#content").append(div);				
+
+				return div;	 		
+		 	}
+
 		    function loadItems(siteId)
 		 	{
 		 		currentSiteId = $('#content').attr('currentSiteId');
@@ -147,43 +188,10 @@
 
 					for (var x = 0; x < data.items.length; x++)
 					{
-						var div      = $("<div>");
-						div.attr('class', 'contentItem');
-						
-						var title    = $("<a>").text(data.items[x].siteId + ': ' + data.items[x].title);
-						title.attr('href', data.items[x].source);
-						
-						var when     = $("<b>").text(data.items[x].timestamp + "   ");
-
-						var saveText = $("<sup>").text("[save destination page]");
-						var saveLink = $("<a>").text("");
-						saveLink.append(saveText);
-						saveLink.attr('href', '#');
-						saveLink.attr('class', 'saveLink');
-						saveLink.attr('itemId', data.items[x].itemId);
-						saveLink.click( function() {
-							var id = parseInt($(this).attr('itemId'));
-							$.post("savePage.php",
-							{
-								itemId: id
-							}, function(data) {
-								data = decodeJSON(data);
-								if (data)
-									addStatusMessage(data.message);
-							});
-						});
-
-						var contents = $("<div>").html(data.items[x].contents);
-
-						div.append(when);
-						div.append(saveLink);
-						div.append($("<br>"));
-						div.append(title);
-						div.append($("<br>"));
-						div.append(contents);
+						var div      = itemToDiv(data.items[x]);
 						$("#content").append(div);
 
-						var hr = $("<hr>");
+						var hr       = $("<hr>");
 						var itemName = 'item' + data.items[x].itemId;
 						hr.attr('id', itemName);
 						hr.attr('itemId', data.items[x].itemId);
@@ -327,40 +335,7 @@
 
 								for (var x = 0; x < data.items.length; x++)
 								{
-									var div      = $("<div>");
-									div.attr('class', 'contentItem');
-									
-									var title    = $("<a>").text(data.items[x].siteId + ': ' + data.items[x].title);
-									title.attr('href', data.items[x].source);
-									
-									var when     = $("<b>").text(data.items[x].timestamp + "   ");
-
-									var saveText = $("<sup>").text("[save destination page]");
-									var saveLink = $("<a>").text("");
-									saveLink.append(saveText);
-									saveLink.attr('href', '#');
-									saveLink.attr('class', 'saveLink');
-									saveLink.attr('itemId', data.items[x].itemId);
-									saveLink.click( function() {
-										var id = parseInt($(this).attr('itemId'));
-										$.post("savePage.php",
-										{
-											itemId: id
-										}, function(data) {
-											data = decodeJSON(data);
-											if (data)
-												addStatusMessage(data.message);
-										});
-									});
-
-									var contents = $("<div>").html(data.items[x].contents);
-
-									div.append(when);
-									div.append(saveLink);
-									div.append($("<br>"));
-									div.append(title);
-									div.append($("<br>"));
-									div.append(contents);
+									var div = itemToDiv(data.items[x]);
 									$("#content").append(div);
 								}
 							});
@@ -419,6 +394,9 @@
 					searchTerm = $("#searchTerm").val();
 					search(searchTerm)
 				});
+				$("#clearSearch").click(function() {
+					$('#searchResults').empty();
+				});
 
    			});
  			
@@ -448,8 +426,8 @@
 			<br />
 			<div id='searchPanel'>
 				<div id='searchTitle'>
-					<input id='searchTerm' type='TEXT' value='Search Term'/><br />
-					<a id='search' href='#'>Search</a>
+					<div>Search <a id='clearSearch' href='#'><sup>(clear all)</sup></a></div>
+					<input id='searchTerm' type='TEXT' value='Search Term'/><a id='search' href='#'>Go</a>
 				</div>
 				<div id='searchResults'></div>
 			</div>

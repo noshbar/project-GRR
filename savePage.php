@@ -7,7 +7,7 @@ require_once 'database.php';
    wget : use wget to get the page and all its resources, rewriting links to point locally
 */
 
-$wkhtmltopdf = shell_exec('which wkhtmltopdf2');
+$wkhtmltopdf = shell_exec('which wkhtmltopdf');
 if (!empty($wkhtmltopdf))
 {
 	require_once 'WkHtmlToPdf.php';
@@ -116,7 +116,7 @@ if ($itemId == -1)
 	die();
 
 $db         = openDatabase('test.db');
-$query      = 'SELECT site.name, item.source, item.title FROM site, item WHERE site.id=item.siteId AND item.id = ?';
+$query      = 'SELECT site.name, item.source, contents.title FROM site, item, contents WHERE site.id=item.siteId AND contents.docid=item.id AND item.id = ?';
 $parameters = array($itemId);
 
 $prepared = $db->prepare($query);
