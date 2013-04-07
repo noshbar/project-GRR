@@ -17,7 +17,7 @@ function addSite($Database, $Site)
 	}
 	catch(PDOException $e)
 	{
-		$result = 'addSite() Exception : '.$e->getMessage();
+		quit('addSite() Exception : '.$e->getMessage());
 	}
 	return $result;
 }

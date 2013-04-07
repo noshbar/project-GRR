@@ -8,8 +8,7 @@ $itemOffset = 0;
 if (isset($_POST['itemOffset']))
     $itemOffset = $_POST['itemOffset'];
 
-$db    = openDatabase('test.db');
-//$query = 'SELECT siteId, source, title, contents, timestamp FROM item WHERE read=0 AND deleted=0';
+$db             = openDatabase('test.db');
 $parameters     = array();
 $query          = 'SELECT item.id, site.name, item.source, item.title, item.timestamp, item.contents FROM site, item WHERE read=0 AND item.deleted=0 AND site.id=item.siteId';
 if (isset($_POST['id']) && ($_POST['id'] != -1))

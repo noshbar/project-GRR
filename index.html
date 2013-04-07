@@ -42,6 +42,15 @@
 				overflow: auto;
 				background: #aaaaff;
 			}
+			div.contentItem
+			{
+				width:   600px;
+				padding: 20px;
+			}
+			div#sites
+			{
+				padding: 5px;
+			}
 
 			body { background: #666666; }
 			#content { background: #ffffff; }
@@ -89,6 +98,30 @@
 		 			loadItems($('#content').attr('currentSiteId'));
 		 	}
 
+		 	function addStatusMessage(message)
+		 	{
+		 		if (!message)
+		 			return;
+
+				var div = $('<div>').html(message);
+				div.attr('class', 'statusMessage');
+				$('#messages').prepend(div);
+				$('#messages').prepend($('<br>'));
+		 	}
+
+		 	function decodeJSON(data)
+		 	{
+		 		if (!data)
+		 			return null;
+
+				data = jQuery.parseJSON(data);
+				if (!data.error)
+					return data;
+
+				addStatusMessage(data.error);
+				return null;
+		 	}
+
 		    function loadItems(siteId)
 		 	{
 		 		currentSiteId = $('#content').attr('currentSiteId');
@@ -104,7 +137,7 @@
 					maxItems   : 10,
 				},
 				function(data, status) {
-					data = jQuery.parseJSON(data);
+					data = decodeJSON(data);
 					if (!data || !data.items || !data.items.length)
 					{
 						var div = $("<div>").text('Nothing to see here.');
@@ -114,14 +147,17 @@
 
 					for (var x = 0; x < data.items.length; x++)
 					{
-						var div = $("<div>");
+						var div      = $("<div>");
+						div.attr('class', 'contentItem');
 						
-						var title = $("<a>").text(data.items[x].siteId + ': ' + data.items[x].title);
+						var title    = $("<a>").text(data.items[x].siteId + ': ' + data.items[x].title);
 						title.attr('href', data.items[x].source);
 						
-						var when  =  $("<b>").text(data.items[x].timestamp);
+						var when     = $("<b>").text(data.items[x].timestamp + "   ");
 
-						var saveLink = $("<a>").text("[save destination page]");
+						var saveText = $("<sup>").text("[save destination page]");
+						var saveLink = $("<a>").text("");
+						saveLink.append(saveText);
 						saveLink.attr('href', '#');
 						saveLink.attr('class', 'saveLink');
 						saveLink.attr('itemId', data.items[x].itemId);
@@ -131,9 +167,9 @@
 							{
 								itemId: id
 							}, function(data) {
-								var div = $('<div>').html(data);
-								div.attr('class', 'statusMessage');
-								$('#status').append(div);
+								data = decodeJSON(data);
+								if (data)
+									addStatusMessage(data.message);
 							});
 						});
 
@@ -229,7 +265,7 @@
 					$('#sites').append(div);
 
 					var totalUnread = 0;
-					data = jQuery.parseJSON(data);
+					data = decodeJSON(data);
 					if (data && data.sites && data.sites.length)
 					{
 						for (var x = 0; x < data.sites.length; x++)
@@ -264,6 +300,10 @@
 						$(this).attr('value', '');
 				});
 
+				$("#clearMessages").click(function() {
+					$('#messages').empty();
+				});
+
 				$("#addSite").click(function() {
 					title = $("#siteName").val();
 					url   = $("#siteSource").val();
@@ -272,7 +312,7 @@
 						siteName:title,
 						siteSource:url
 					}, function(data) {
-						data = jQuery.parseJSON(data);
+						data = decodeJSON(data);
 						addSiteToList(data.site.name, data.site.id, data.site.unread);
 						loadItems(data.site.id);
 						var totalUnread = parseInt($('#counterAll').attr('unreadCount'));
@@ -302,7 +342,9 @@
 			<br />
 			<br />
 			<div id='status'>
-				Messages:<br />
+				Messages: <a id='clearMessages' href='#'><sup>(clear all)</sup></a><br />
+				<div id='messages'>
+				</div>
 			</div>
 		</div>
 		<div id='content' class='contents'>

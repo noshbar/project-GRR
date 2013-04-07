@@ -1,5 +1,11 @@
 <?php
 
+function quit($message)
+{
+    $result['error'] = $message;
+    die(json_encode($result));
+}
+
 function openDatabase($Filename)
 {
 	try
@@ -16,7 +22,7 @@ function openDatabase($Filename)
 				$result = $db->exec($table);
 				if ($result)
 				{
-					die('Could not create table: '.$table."\n");
+					quit('Could not create table: '.$table."\n");
 				}
 			}
 		}
@@ -24,7 +30,7 @@ function openDatabase($Filename)
 	}	
 	catch(PDOException $e)
 	{
-		die('openDatabase() Exception : '.$e->getMessage());
+		quit('openDatabase() Exception : '.$e->getMessage());
 	}
 	return null;
 }

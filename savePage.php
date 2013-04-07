@@ -7,12 +7,19 @@ require_once 'database.php';
    wget : use wget to get the page and all its resources, rewriting links to point locally
 */
 
-$engine      = '';
-$wkhtmltopdf = shell_exec('which wkhtmltopdf');
+$wkhtmltopdf = shell_exec('which wkhtmltopdf2');
 if (!empty($wkhtmltopdf))
 {
 	require_once 'WkHtmlToPdf.php';
 	$engine = 'wkhtml';
+}
+elseif (function_exists('curl_init'))
+{
+    $engine = 'curl';
+}
+else
+{
+    $engine = 'fetch';
 }
 
 //from http://stackoverflow.com/questions/2668854/sanitizing-strings-to-make-them-url-and-filename-safe
@@ -42,6 +49,12 @@ function savePageWkhtml($url, $filename)
     return 'Created PDF: <a href="'.$url.'">'.$urlText.'</a>';
 }
 
+function localizeFile($filename)
+{
+    //get all the resources needed to show the page
+    //change their urls to point locally
+}
+
 //from http://nadeausoftware.com/articles/2007/06/php_tip_how_get_web_page_using_curl
 function savePageCurl($url, $filename)
 {
@@ -65,11 +78,31 @@ function savePageCurl($url, $filename)
     $header  = curl_getinfo( $ch );
     curl_close( $ch );
 
-    if ($err == 0)
+    if ($err != 0)
+        quit("Could not save page using cURL: $err");
+
+    file_put_contents($filename, $content);
+    localizeFile($filename);
+    $url = substr($filename, strpos($filename, '/saved/') + 1);
+    $urlText = substr(strrchr($filename, '/'), 1);
+    return 'Saved HTML: <a href="'.$url.'">'.$urlText.'</a>';
+}
+
+function savePageFetch($url, $filename)
+{
+    $content = file_get_contents($url);
+    if ($content === FALSE)
     {
-        file_put_contents($filename, $content);
+        $message = error_get_last();
+        $message = $message['message'];
+        quit("Could not save page using get_contents ($message)");
     }
-    //TODO: parse DOM to get all SRC elements, then get each of the files.
+
+    file_put_contents($filename, $content);
+    localizeFile($filename);
+    $url = substr($filename, strpos($filename, '/saved/') + 1);
+    $urlText = substr(strrchr($filename, '/'), 1);
+    return 'Saved HTML: <a href="'.$url.'">'.$urlText.'</a>';
 }
 
 $itemId = -1;
@@ -94,15 +127,20 @@ $site  = sanitize($row['name'], true, true);
 $title = sanitize($row['title'], true, true);
 
 $filename = dirname(__FILE__).'/saved/'.$site.'/';
-mkdir($filename, true);
+if (!file_exists($filename) && !mkdir($filename, 0777, true))
+{
+    $message = error_get_last();
+    $message = $message['message'];
+    quit("Could not create folder $filename ($message)");
+}
 $filename .= $itemId.'-'.$title;
 
 if ($engine == 'wkhtml')
-    $result = savePageWkhtml($row['source'], $filename.'.pdf');
+    $result['message'] = savePageWkhtml($row['source'], $filename.'.pdf');
 elseif ($engine == 'curl')
-    $result = savePageCurl($row['source'], $filename.'.html');
+    $result['message'] = savePageCurl($row['source'], $filename.'.html');
 else
-    $result = "No download mechanism found (enable wkhtmltopdf, cURL or wget)";
+    $result['message'] = savePageFetch($row['source'], $filename.'.html');
 
-echo $result;
+echo(json_encode($result));
 ?>
