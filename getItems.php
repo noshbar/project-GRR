@@ -10,7 +10,7 @@ if (isset($_POST['itemOffset']))
 
 $db             = openDatabase('test.db');
 $parameters     = array();
-$query          = 'SELECT item.id, site.name, item.source, item.title, item.timestamp, item.contents FROM site, item WHERE read=0 AND item.deleted=0 AND site.id=item.siteId';
+$query          = 'SELECT item.id, site.name, item.source, item.timestamp, contents.title, contents.body FROM site, item, contents WHERE read=0 AND item.deleted=0 AND site.id=item.siteId AND contents.docid=item.contentId';
 if (isset($_POST['id']) && ($_POST['id'] != -1))
 {
 	$query .= ' AND item.siteId=?';
@@ -23,7 +23,7 @@ if (isset($_POST['lastId']) && ($_POST['lastId'] != -1))
 }
 
 $query .= ' ORDER BY timestamp ASC LIMIT '.$maxItems;//.' OFFSET '.$itemOffset; <- this is taken care of by things marking themselves as read
-
+error_log("$query");
 $prepared = $db->prepare($query);
 $prepared->execute($parameters);
 $rows = $prepared->fetchAll(); 
@@ -35,7 +35,7 @@ foreach ($rows as $row)
 	$item['siteId']    = $row['name'];
 	$item['source']    = $row['source'];
 	$item['title']     = $row['title'];
-	$item['contents']  = $row['contents'];
+	$item['contents']  = $row['body'];
 	$item['timestamp'] = date("F j, Y, g:i a", (int)$row['timestamp']);
 	$result['items'][$index++] = $item;
 }

@@ -9,29 +9,39 @@ function updateFeed($Database, $Site)
 	//I kinda just rely on the insert failing if there's a duplicate because the feed hasn't updated.
 	//What I SHOULD do is either check to see if the item exists before inserting it... or better yet,
 	//only get the newer items through a smarter HTTP get
-	$rss      = Feed::loadRss($Site['source']);
-	$prepared = $Database->prepare('INSERT INTO item(siteId, guid, source, timestamp, contents, title) VALUES (?, ?, ?, ?, ?, ?)');
-	$count    = 0;
+	$rss             = Feed::loadRss($Site['source']);
+	$itemPrepared    = $Database->prepare('INSERT INTO item(siteId, guid, source, timestamp, contentId) VALUES (?, ?, ?, ?, ?)');
+	$contentPrepared = $Database->prepare('INSERT INTO contents(title, body) VALUES (?, ?)');
+	$count           = 0;
 	foreach ($rss->item as $item)
 	{
 		try
 		{
+			//populate the full text search table with the title and body
+			$parameters = array();
+			$parameters[0] = $item->title;
+			if (isset($item->{'content:encoded'}))
+				$parameters[1] = $item->{'content:encoded'};
+			else
+				$parameters[1] = $item->description;
+			$Database->beginTransaction();
+			$contentPrepared->execute($parameters);
+			$contentId = $Database->lastInsertId();
+			$Database->commit();
+
+			//add the item details pointing to the new content id
 			$parameters    = array();
 			$parameters[0] = $Site['id'];
 			$parameters[1] = $item->guid;
 			$parameters[2] = $item->link;
 			$parameters[3] = $item->timestamp;
-			if (isset($item->{'content:encoded'}))
-				$parameters[4] = $item->{'content:encoded'};
-			else
-				$parameters[4] = $item->description;
-			$parameters[5] = $item->title;
+			$parameters[4] = $contentId;
 
-			$prepared->execute($parameters);
+			$itemPrepared->execute($parameters);
 		}
 		catch(PDOException $e)
 		{
-			die('updateFeed() Exception : '.$e->getMessage());
+			quit('updateFeed() Exception : '.$e->getMessage());
 		}
 		$count++;
 	}
