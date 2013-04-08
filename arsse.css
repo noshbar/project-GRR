@@ -1,5 +1,6 @@
 body
 {
+    font-family: arial, sans-serif;
     margin: 0; /* margin and padding only necessary to cater for Mac IE5 */
     padding: 0;
     /*\*/   overflow: hidden; /* because Mac IE5 don't understand */
@@ -66,6 +67,6 @@ a.hide
     background: url(close.png) no-repeat center center;
 }
 
-body { background: #666666; }
+body { background: #000000; }
 #content { background: #ffffff; }
 #siteList { background: #ffffff; }

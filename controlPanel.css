@@ -47,7 +47,7 @@
 .tab div a
 {
     color:#000;
-    font-weight:bold;
+    /*font-weight:bold;*/
 }
 
 form#addForm label

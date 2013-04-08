@@ -55,6 +55,7 @@
 				var div = $('<div>').html(message);
 				div.attr('class', 'statusMessage');
 				$('#messages').prepend(div);
+				$('#newMessageAlert').show();
 		 	}
 
 		 	function decodeJSON(data)
@@ -259,6 +260,11 @@
 						$("#searchResults").append(div);
 						return;
 					}
+					else
+					{
+						var div = $("<div>").text(data.items.length + ' results returned.');
+						$("#searchResults").append(div);
+					}
 
 					for (var x = 0; x < data.items.length; x++)
 					{
@@ -333,6 +339,7 @@
 
 				$("#clearMessages").click(function() {
 					$('#messages').empty();
+					$("#newMessageAlert").hide();
 				});
 
 				$("#addSite").click(function() {
@@ -354,6 +361,22 @@
 					$('#controlPanel').show();
 				});
 
+				$("#newMessageAlert").hide();
+				$("#newMessageAlert").click(function() {
+					$("#controlPanel").show();
+				    $("a","ul").removeClass("selected") 
+				    .filter("[href='#messagePane']","ul").addClass("selected"); 
+				    $("#manageSitesPane").hide();
+				    $("#searchPane").hide();
+				    $("#messagePane").show();
+					$("#newMessageAlert").hide();
+				});
+
+				$("#messagePane").click(function() {
+					$("#newMessageAlert").hide();
+				});
+
+				$("#controlPanel").hide();
    			});
  			
 		 </script> 
@@ -364,7 +387,7 @@
 			</div>
 			<br />
 			<br />
-			<a id='showControlPanel' href='#'>Control Panel</a>
+			<a id='showControlPanel' href='#'>Control Panel</a><img id='newMessageAlert' src='star.png' title='New message(s)' />
 		</div>
 
 		<div id='content' class='contents'>
@@ -406,9 +429,24 @@
 			</div>
 
 			<script type="text/javascript"> 
-				$("#controlPanel ul").idTabs(); 
+				$("#controlPanel ul").idTabs(function(id, list, set) { 
+					if (id == '#messagePane')
+						$("#newMessageAlert").hide();
+					return true;
+				});
 			</script>
 		</div>
+
+		<script>
+			$("#searchTerm").keypress(function(event) {
+				if (event.which == 13)
+				{
+					searchTerm = $("#searchTerm").val();
+					siteId = $("#searchSiteList").val();
+					search(searchTerm, siteId)
+				}
+			});
+		</script>
 
 	</body>
 </html>
