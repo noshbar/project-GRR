@@ -2,60 +2,7 @@
 	<head>
 		<meta http-equiv="Cache-Control" content="no-cache">
 		<meta http-equiv='Content-Type'  content='text/html; charset=utf-8'>
-
-		<style type="text/css">
-			body
-			{
-				margin: 0; /* margin and padding only necessary to cater for Mac IE5 */
-				padding: 0;
-				/*\*/	overflow: hidden; /* because Mac IE5 don't understand */
-			}
-			div
-			{
-				margin: 0;
-				padding: 0;
-			}
-			#content
-			{
-				/*\*/
-				position: absolute;
-				top:      5px;
-				right:    5px;
-				bottom:   5px;
-				left:     200px;
-				/* Exclude all previous props for Mac IE5 */
-				margin:   5px 5px 5px 200px; /* Cater for Mac IE5 */
-				/*\*/ margin: 0; /* Put back for all the rest */
-				/*\*/ overflow: auto; /* no need for Mac IE5 to see this */
-			}
-			#siteList
-			{
-				position: absolute;
-				top:      5;
-				bottom:   5;
-				left:     5;
-				width:    190px;
-				overflow: auto;
-			}
-			div.statusMessage
-			{
-				overflow: auto;
-				background: #aaaaff;
-			}
-			div.contentItem
-			{
-				width:   600px;
-				padding: 20px;
-			}
-			div#sites
-			{
-				padding: 5px;
-			}
-
-			body { background: #666666; }
-			#content { background: #ffffff; }
-			#siteList { background: #ffffff; }
-		</style>
+		<link href="arsse.css" rel="stylesheet">
 		<!--[if lt IE 7]>
 		<style type="text/css" media="screen">
 			/* let the IE expressions commence */
@@ -70,9 +17,11 @@
 			}
 		</style>
 		<![endif]-->
+		<link href="controlPanel.css" rel="stylesheet">
 
-		 <script type="text/javascript" src="jquery-1.9.1.min.js"></script>          
-		 <script type="text/javascript" src="waypoints.min.js"></script>          
+		 <script type="text/javascript" src="jquery-1.9.1.min.js"></script>
+		 <script type="text/javascript" src="waypoints.min.js"></script>
+		 <script type="text/javascript" src="jquery.idTabs.min.js"></script>
 		 <script type="text/javascript"> 
 
 		 	function decreaseCount(siteName)
@@ -106,7 +55,6 @@
 				var div = $('<div>').html(message);
 				div.attr('class', 'statusMessage');
 				$('#messages').prepend(div);
-				$('#messages').prepend($('<br>'));
 		 	}
 
 		 	function decodeJSON(data)
@@ -258,6 +206,11 @@
 				div.append($("<br>"))
 
 				$("#sites").append(div);
+
+				//while we're here, may as well populate the search list too...
+				var option = $("<option>").text(siteName);
+				option.attr('value', siteId);
+				$('#searchSiteList').append(option);
 		 	}
 
 		 	function loadSites()
@@ -288,15 +241,15 @@
 				});
 		 	}
 
-		 	function search(term)
+		 	function search(term, siteId)
 		 	{
 		 		$("#searchResults").empty();
-		 		$('#content').empty();
-		 		$('#content').attr('currentSiteId', -1);
+		 		$("#searchResults").append($('<br>'));
 
 				$.post("search.php",
 				{
-					searchTerm:term
+					searchTerm : term,
+					site       : siteId
 				}, function(data) {
 					data = decodeJSON(data);
 					if (!data || !data.items || !data.items.length)
@@ -313,7 +266,6 @@
 						var showItem = $("<a>").text(linkText);
 
 						div.append(showItem);
-						$("#searchResults").append($("<br />"));
 						$("#searchResults").append(div);
 
 						showItem.attr('href', '#');
@@ -344,29 +296,29 @@
 				});
 		 	}
 
+		 	function addSite(title, url)
+		 	{
+				$.post("addSite.php",
+				{
+					siteName:title,
+					siteSource:url
+				}, function(data) {
+					data = decodeJSON(data);
+					addSiteToList(data.site.name, data.site.id, data.site.unread);
+					loadItems(data.site.id);
+					var totalUnread = parseInt($('#counterAll').attr('unreadCount'));
+					totalUnread += data.site.unread;
+					$('#counterAll').attr('unreadCount', totalUnread);
+					$('#counterAll').text(' (' + totalUnread + ')');
+				});
+		 	}
+
 			$(document).ready(function() {
 		 		$('#content').attr('currentSiteId', -2);
 		 		$('#content').attr('pendingMarks', 0);
 
 				loadSites();
 				loadItems(-1);
-
-				//and now for the Ugly Triplets...
-				$("#siteName").focus(function() {
-					var value = $(this).attr('value');
-					if (value == 'Site Name')
-						$(this).attr('value', '');
-				});
-				$("#siteSource").focus(function() {
-					var value = $(this).attr('value');
-					if (value == 'Feed URL')
-						$(this).attr('value', '');
-				});
-				$("#searchTerm").focus(function() {
-					var value = $(this).attr('value');
-					if (value == 'Search Term')
-						$(this).attr('value', '');
-				});
 
 				$("#clearMessages").click(function() {
 					$('#messages').empty();
@@ -375,27 +327,20 @@
 				$("#addSite").click(function() {
 					title = $("#siteName").val();
 					url   = $("#siteSource").val();
-					$.post("addSite.php",
-					{
-						siteName:title,
-						siteSource:url
-					}, function(data) {
-						data = decodeJSON(data);
-						addSiteToList(data.site.name, data.site.id, data.site.unread);
-						loadItems(data.site.id);
-						var totalUnread = parseInt($('#counterAll').attr('unreadCount'));
-						totalUnread += data.site.unread;
-						$('#counterAll').attr('unreadCount', totalUnread);
-						$('#counterAll').text(' (' + totalUnread + ')');
-					});
+					addSite(title, url);
 				});
 
 				$("#search").click(function() {
 					searchTerm = $("#searchTerm").val();
-					search(searchTerm)
+					siteId = $("#searchSiteList").val();
+					search(searchTerm, siteId)
 				});
-				$("#clearSearch").click(function() {
-					$('#searchResults').empty();
+
+				$("#hideControlPanel").click(function() {
+					$('#controlPanel').hide();
+				});
+				$("#showControlPanel").click(function() {
+					$('#controlPanel').show();
 				});
 
    			});
@@ -408,31 +353,52 @@
 			</div>
 			<br />
 			<br />
-			<div id='addSiteDiv'>
+			<a id='showControlPanel' href='#'>Control Panel</a>
+		</div>
+
+		<div id='content' class='contents'>
+		</div>
+
+		<div id='controlPanel' class='tab'>
+			<a id='hideControlPanel' class='hide' href="#"></a>
+			<ul> 
+				<li><a href="#manageSitesPane">Manage sites</a></li> 
+				<li><a href="#messagePane">Messages</a></li> 
+				<li><a href="#searchPane">Search</a></li> 
+			</ul> 
+			<div id='manageSitesPane'>
 				<form method='post' id='addForm'>
-					<input id='siteName' type='TEXT' value='Site Name'/><br />
-					<input id='siteSource' type='TEXT' value='Feed URL'/><br />
-					<a id='addSite' href='#'>Add</a>
+					<fieldset>
+						<legend>Add site</legend>
+						<label for='siteName'>Name:</label>
+						<input id='siteName' type='TEXT' value='Site Name' placeholder='E.g., Engadget' size='100' /><br />
+						<label for='siteSource'>Source:</label>
+						<input id='siteSource' type='TEXT' value='Feed URL' placeholder='E.g., http://www.engadget.com/rss.xml' size='100' /><br />
+						<a id='addSite' href='#'>Add</a>
+					</fieldset>
 				</form>
 			</div>
-			<br />
-			<br />
-			<div id='status'>
+			<div id='messagePane'>
 				Messages: <a id='clearMessages' href='#'><sup>(clear all)</sup></a><br />
 				<div id='messages'>
 				</div>
 			</div>
-			<br />
-			<br />
-			<div id='searchPanel'>
-				<div id='searchTitle'>
-					<div>Search <a id='clearSearch' href='#'><sup>(clear all)</sup></a></div>
-					<input id='searchTerm' type='TEXT' value='Search Term'/><a id='search' href='#'>Go</a>
+			<div id='searchPane'>
+				<div>
+					<select id='searchSiteList'>
+					</select>
+					&nbsp;for&nbsp;
+					<input id='searchTerm' type='TEXT' placeholder='Search term' size='50' />
+					<a id='search' href='#'>Search</a>
 				</div>
-				<div id='searchResults'></div>
+
+				<div id='searchResults' class='searchResults'></div>
 			</div>
+
+			<script type="text/javascript"> 
+				$("#controlPanel ul").idTabs(); 
+			</script>
 		</div>
-		<div id='content' class='contents'>
-		</div>
+
 	</body>
 </html>

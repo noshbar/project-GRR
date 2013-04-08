@@ -1,0 +1,71 @@
+body
+{
+    margin: 0; /* margin and padding only necessary to cater for Mac IE5 */
+    padding: 0;
+    /*\*/   overflow: hidden; /* because Mac IE5 don't understand */
+}
+div
+{
+    margin: 0;
+    padding: 0;
+}
+#content
+{
+    /*\*/
+    position: absolute;
+    top:      5px;
+    right:    5px;
+    bottom:   5px;
+    left:     200px;
+    /* Exclude all previous props for Mac IE5 */
+    margin:   5px 5px 5px 200px; /* Cater for Mac IE5 */
+    /*\*/ margin: 0; /* Put back for all the rest */
+    /*\*/ overflow: auto; /* no need for Mac IE5 to see this */
+}
+#siteList
+{
+    position: absolute;
+    top:      5;
+    bottom:   5;
+    left:     5;
+    width:    190px;
+    overflow: auto;
+}
+div.statusMessage
+{
+    overflow: auto;
+    background: #aaaaff;
+}
+div.contentItem
+{
+    width:   600px;
+    padding: 20px;
+}
+div#sites
+{
+    padding: 5px;
+}
+
+div#controlPanel
+{
+    /*\*/
+    position:   absolute;
+    top:        70%;
+    bottom:     20px;
+    left:       210px;
+    right:      30px;
+    background: #dddddd;
+    overflow:   auto;
+}
+a.hide
+{
+    display:    block;
+    float:      right;
+    width:      32px;
+    height:     32px;
+    background: url(close.png) no-repeat center center;
+}
+
+body { background: #666666; }
+#content { background: #ffffff; }
+#siteList { background: #ffffff; }

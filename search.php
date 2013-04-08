@@ -5,6 +5,13 @@ $db             = openDatabase('test.db');
 $parameters     = array($_POST['searchTerm']);
 $query          = 'SELECT item.id, site.name, contents.title FROM site, item, contents WHERE item.contentId=contents.docid AND site.id=item.siteId AND contents.body MATCH ?';
 
+if (isset($_POST['site']) && ($_POST['site'] != -1))
+{
+    $query .= ' AND item.siteId=?';
+    array_push($parameters, $_POST['site']);
+}
+
+$query .= ' ORDER BY timestamp ASC';
 $prepared = $db->prepare($query);
 $prepared->execute($parameters);
 $rows = $prepared->fetchAll(); 
