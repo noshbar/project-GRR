@@ -22,22 +22,6 @@ else
     $engine = 'fetch';
 }
 
-//from http://stackoverflow.com/questions/2668854/sanitizing-strings-to-make-them-url-and-filename-safe
-function sanitize($string, $force_lowercase = true, $anal = false) 
-{
-    $strip = array("~", "`", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "=", "+", "[", "{", "]",
-                   "}", "\\", "|", ";", ":", "\"", "'", "&#8216;", "&#8217;", "&#8220;", "&#8221;", "&#8211;", "&#8212;",
-                   "â€”", "â€“", ",", "<", ".", ">", "/", "?");
-    $clean = trim(str_replace($strip, "", strip_tags($string)));
-    $clean = preg_replace('/\s+/', "-", $clean);
-    $clean = ($anal) ? preg_replace("/[^a-zA-Z0-9]/", "_", $clean) : $clean ;
-    return ($force_lowercase) ?
-        (function_exists('mb_strtolower')) ?
-            mb_strtolower($clean, 'UTF-8') :
-            strtolower($clean) :
-        $clean;
-}
-
 function savePageWkhtml($url, $filename)
 {
 	$pdf = new WkHtmlToPdf;	
@@ -123,24 +107,24 @@ $prepared = $db->prepare($query);
 $prepared->execute($parameters);
 $row      = $prepared->fetch(); 
 
-$site  = sanitize($row['name'], true, true);
-$title = sanitize($row['title'], true, true);
-
-$filename = dirname(__FILE__).'/saved/'.$site.'/';
-if (!file_exists($filename) && !mkdir($filename, 0777, true))
+$filename = getSaveName($row['name'], $itemId, $row['title']);
+$folder   = dirname($filename.'.pdf');
+if (!file_exists($folder) && !mkdir($folder, 0777, true))
 {
     $message = error_get_last();
     $message = $message['message'];
-    quit("Could not create folder $filename ($message)");
+    quit("Could not create folder $folder ($message)");
 }
-$filename .= $itemId.'-'.$title;
+
+$source = explode('#', $row['source']);
+$source = $source[0];
 
 if ($engine == 'wkhtml')
-    $result['message'] = savePageWkhtml($row['source'], $filename.'.pdf');
+    $result['message'] = savePageWkhtml($source, $filename.'.pdf');
 elseif ($engine == 'curl')
-    $result['message'] = savePageCurl($row['source'], $filename.'.html');
+    $result['message'] = savePageCurl($source, $filename.'.html');
 else
-    $result['message'] = savePageFetch($row['source'], $filename.'.html');
+    $result['message'] = savePageFetch($source, $filename.'.html');
 
 echo(json_encode($result));
 ?>

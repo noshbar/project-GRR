@@ -260,7 +260,7 @@ class WkHtmlToPdf
 
         foreach($this->objects as $object)
         {
-            $command .= ' '.$object['input'];
+            $command .= ' '.escapeshellarg($object['input']); //d
             unset($object['input']);
             $command .= $this->renderOptions($object);
         }

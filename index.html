@@ -190,11 +190,13 @@
 		 	{
 				var div  = $("<div>");
 				var link = $("<a>").text(siteName);
-				link.attr('href', '#' + siteId);
+				link.attr('id', parseInt(siteId));
+				link.attr('href', '#');
 				link.click(function() {
 					disableWayPoints();
-					var href = $(this).attr('href');
-					loadItems(href.substring(1));
+					$('#content').attr('pendingMarks', 0);
+					var id = parseInt($(this).attr('id'));
+					loadItems(id);
 				});
 
 				var counter = $('<span>').text(' (' + siteUnread + ')');
@@ -244,7 +246,6 @@
 		 	function search(term, siteId)
 		 	{
 		 		$("#searchResults").empty();
-		 		$("#searchResults").append($('<br>'));
 
 				$.post("search.php",
 				{
@@ -255,7 +256,7 @@
 					if (!data || !data.items || !data.items.length)
 					{
 						var div = $("<div>").text('No results returned.');
-						$("#searchResuls").append(div);
+						$("#searchResults").append(div);
 						return;
 					}
 
@@ -267,6 +268,15 @@
 
 						div.append(showItem);
 						$("#searchResults").append(div);
+
+						if (data.items[x].localCopy)
+						{
+							var linkSup = $("<sup>").text('(local copy)');
+							var localItem = $("<a>");
+							localItem.append(linkSup);
+							localItem.attr('href', data.items[x].localCopy);
+							div.append(localItem);
+						}
 
 						showItem.attr('href', '#');
 						showItem.attr('itemId', data.items[x].itemId);
@@ -305,6 +315,7 @@
 				}, function(data) {
 					data = decodeJSON(data);
 					addSiteToList(data.site.name, data.site.id, data.site.unread);
+					disableWayPoints();
 					loadItems(data.site.id);
 					var totalUnread = parseInt($('#counterAll').attr('unreadCount'));
 					totalUnread += data.site.unread;
@@ -371,9 +382,9 @@
 					<fieldset>
 						<legend>Add site</legend>
 						<label for='siteName'>Name:</label>
-						<input id='siteName' type='TEXT' value='Site Name' placeholder='E.g., Engadget' size='100' /><br />
+						<input id='siteName' type='TEXT' placeholder='E.g., Engadget' size='100' /><br />
 						<label for='siteSource'>Source:</label>
-						<input id='siteSource' type='TEXT' value='Feed URL' placeholder='E.g., http://www.engadget.com/rss.xml' size='100' /><br />
+						<input id='siteSource' type='TEXT' placeholder='E.g., http://www.engadget.com/rss.xml' size='100' /><br />
 						<a id='addSite' href='#'>Add</a>
 					</fieldset>
 				</form>
@@ -391,7 +402,6 @@
 					<input id='searchTerm' type='TEXT' placeholder='Search term' size='50' />
 					<a id='search' href='#'>Search</a>
 				</div>
-
 				<div id='searchResults' class='searchResults'></div>
 			</div>
 
