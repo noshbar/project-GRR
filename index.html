@@ -64,6 +64,10 @@
 		 			return null;
 
 				data = jQuery.parseJSON(data);
+
+				if (data.warning)
+					addStatusMessage(data.warning);
+
 				if (!data.error)
 					return data;
 

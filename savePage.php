@@ -7,30 +7,32 @@ require_once 'database.php';
    wget : use wget to get the page and all its resources, rewriting links to point locally
 */
 
+$tryCurl  = function_exists('curl_init');
+$tryWk    = FALSE;
+
 $wkhtmltopdf = shell_exec('which wkhtmltopdf');
 if (!empty($wkhtmltopdf))
 {
 	require_once 'WkHtmlToPdf.php';
-	$engine = 'wkhtml';
-}
-elseif (function_exists('curl_init'))
-{
-    $engine = 'curl';
-}
-else
-{
-    $engine = 'fetch';
+	$tryWk = TRUE;
 }
 
 function savePageWkhtml($url, $filename)
 {
+    $result['result'] = FALSE;
+
 	$pdf = new WkHtmlToPdf;	
 	$pdf->addPage($url);
 	if (!$pdf->saveAs($filename))
-        return '['.$filename.'] '.$pdf->getError();
+    {
+        $result['warning'] = '['.$filename.'] '.$pdf->getError(); //Wk is special as it sometimes reports it has fails, but hasn't, and other times just crashes
+        return $result;
+    }
     $url = substr($filename, strpos($filename, '/saved/') + 1);
     $urlText = substr(strrchr($filename, '/'), 1);
-    return 'Created PDF: <a href="'.$url.'">'.$urlText.'</a>';
+    $result['message'] = 'Created PDF: <a href="'.$url.'">'.$urlText.'</a>';
+    $result['result'] = TRUE;
+    return $result;
 }
 
 function localizeFile($filename)
@@ -42,6 +44,8 @@ function localizeFile($filename)
 //from http://nadeausoftware.com/articles/2007/06/php_tip_how_get_web_page_using_curl
 function savePageCurl($url, $filename)
 {
+    $result['result'] = FALSE;
+
     $options = array(
         CURLOPT_RETURNTRANSFER => true,     // return web page
         CURLOPT_HEADER         => false,    // don't return headers
@@ -63,30 +67,40 @@ function savePageCurl($url, $filename)
     curl_close( $ch );
 
     if ($err != 0)
-        quit("Could not save page using cURL: $err");
-
-    file_put_contents($filename, $content);
-    localizeFile($filename);
-    $url = substr($filename, strpos($filename, '/saved/') + 1);
-    $urlText = substr(strrchr($filename, '/'), 1);
-    return 'Saved HTML: <a href="'.$url.'">'.$urlText.'</a>';
-}
-
-function savePageFetch($url, $filename)
-{
-    $content = file_get_contents($url);
-    if ($content === FALSE)
     {
-        $message = error_get_last();
-        $message = $message['message'];
-        quit("Could not save page using get_contents ($message)");
+        $result['error'] = "Could not save page using cURL: $err";
+        return $result;
     }
 
     file_put_contents($filename, $content);
     localizeFile($filename);
     $url = substr($filename, strpos($filename, '/saved/') + 1);
     $urlText = substr(strrchr($filename, '/'), 1);
-    return 'Saved HTML: <a href="'.$url.'">'.$urlText.'</a>';
+    $result['message'] = 'Saved HTML: <a href="'.$url.'">'.$urlText.'</a>';
+    $result['result'] = TRUE;
+    return $result;
+}
+
+function savePageFetch($url, $filename)
+{
+    $result['result'] = FALSE;
+
+    $content = file_get_contents($url);
+    if ($content === FALSE)
+    {
+        $message = error_get_last();
+        $message = $message['message'];
+        $result['error'] = "Could not save page using get_contents ($message)";
+        return $result;
+    }
+
+    file_put_contents($filename, $content);
+    localizeFile($filename);
+    $url = substr($filename, strpos($filename, '/saved/') + 1);
+    $urlText = substr(strrchr($filename, '/'), 1);
+    $result['message'] = 'Saved HTML: <a href="'.$url.'">'.$urlText.'</a>';
+    $result['result'] = TRUE;
+    return $result;
 }
 
 $itemId = -1;
@@ -116,15 +130,21 @@ if (!file_exists($folder) && !mkdir($folder, 0777, true))
     quit("Could not create folder $folder ($message)");
 }
 
-$source = explode('#', $row['source']);
-$source = $source[0];
+$source = $row['source'];
 
-if ($engine == 'wkhtml')
-    $result['message'] = savePageWkhtml($source, $filename.'.pdf');
-elseif ($engine == 'curl')
-    $result['message'] = savePageCurl($source, $filename.'.html');
-else
-    $result['message'] = savePageFetch($source, $filename.'.html');
+$result['result'] = FALSE;
+
+if ($result['result'] === FALSE && $tryWk)
+    $result = savePageWkhtml($source, $filename.'.pdf');
+
+if ($result['result'] === FALSE && $tryCurl)
+    $result = savePageCurl($source, $filename.'.html');
+
+if ($result['result'] === FALSE)
+    $result = savePageFetch($source, $filename.'.html');
+
+if ($result['result'] === FALSE)
+    quit("Could not save $filename");
 
 echo(json_encode($result));
 ?>

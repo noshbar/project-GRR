@@ -306,7 +306,8 @@ class WkHtmlToPdf
 
             $result = proc_close($process);
 //d
-            if($result!==0)
+            error_log("wk status: $result");
+            if($result===2)
             {
                 if (filesize($fileName) == 0)
                 {
@@ -317,6 +318,12 @@ class WkHtmlToPdf
                     $this->error = 'Warning: an error occurred while creating the PDF, but some data was written';
                     return true;
                 }
+            }
+            else
+            {
+                error_log($command);
+                error_log($stderr);
+                $this->error = "Could not run command $command:\n$stderr";
             }
 //d/
         } else
