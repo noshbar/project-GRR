@@ -75,8 +75,10 @@
 				return null;
 		 	}
 
-		 	function itemToDiv(item)
+		 	function itemToDiv(item, index)
 		 	{
+				var itemIdValue = item.itemId; //sigh, something is nuking this value
+
 				var div      = $("<div>");
 				div.attr('class', 'contentItem');
 				
@@ -90,7 +92,7 @@
 				saveLink.append(saveText);
 				saveLink.attr('href', '#');
 				saveLink.attr('class', 'saveLink');
-				saveLink.attr('itemId', item.itemId);
+				saveLink.attr('itemId', itemIdValue);
 				saveLink.click( function() {
 					var id = parseInt($(this).attr('itemId'));
 					$.post("savePage.php",
@@ -111,7 +113,76 @@
 				div.append(title);
 				div.append($("<br>"));
 				div.append(contents);
-				$("#content").append(div);				
+				div.append($("<br>"));
+
+				//tags
+				var tagDiv    = $("<div>");
+				var tagSelect = $("<select>");
+
+				tagDiv.attr('id', 'tagDiv' + index);
+
+				tagSelect.attr('id', 'tagSelect' + index);
+				tagSelect.attr('itemId', itemIdValue);
+				tagSelect.attr('tagDivId', '#tagDiv' + index);
+				tagSelect.change(function() {
+					//oh there has to be a better way of doing this...
+					var tagId = $(this).val();
+					if (tagId == -1)
+						return;
+
+					var elementName = $(this).attr('id');
+					var itemId      = $(this).attr('itemId');
+					var tagText     = $('#'+elementName+' option:selected').text();
+					var tagDivId    = $(this).attr('tagDivId');
+
+					//add it to the tag div
+					var tagSpan     = $('<span>').text(tagText + ' ');
+					var hideTag     = $('<a>');
+					var hideButton  = $('<sup>').text('X');
+
+					tagSpan.attr('class',     'tag');
+					tagSpan.attr('id',        'tagSpan' + tagId);
+
+					//hideTag.attr('class',   'hide');
+					hideTag.attr('href',      '#');
+					hideTag.attr('itemId',    itemId);
+					hideTag.attr('tagText',   tagText);
+					hideTag.attr('tagId',     tagId);
+					hideTag.attr('selectBox', '#'+elementName);
+					hideTag.click(function() {
+						var itemId  = $(this).attr('itemId');
+						var tagText = $(this).attr('tagText');
+						var tagId   = $(this).attr('tagId');
+						var select  = $(this).attr('selectBox');
+
+						var option  = $("<option>").text(tagText);
+						option.attr('value', tagId);
+
+						$('#tagSpan'+tagId).remove();
+						$(select).append(option);
+
+						//TODO: update DB - remove tag:item combo
+					});
+
+					hideTag.append(hideButton);
+					tagSpan.append(hideTag);
+					$(tagDivId).append(tagSpan);
+					//remove it from the list
+					$("#"+elementName+" option[value='"+tagId+"']").remove();
+
+					//TODO: update DB - add tag:item combo
+				});
+
+				tagDiv.append(tagSelect);
+				if (item.tags)
+				{
+					for (var x = 0; x < item.tags.length; x++)
+					{
+						var tag = $("<span>").text(item.tags[x]);
+						tagDiv.append(tag);
+					}
+				}
+				div.append(tagDiv);
 
 				return div;	 		
 		 	}
@@ -123,6 +194,8 @@
 
 		 		$('#content').attr('currentSiteId', siteId);
 		 		lastItemId = $('#counterAll').attr('lastItemId');
+
+		 		$('#content').attr('itemCount', 0);
 
 				$.post("getItems.php",
 				{
@@ -141,7 +214,7 @@
 
 					for (var x = 0; x < data.items.length; x++)
 					{
-						var div      = itemToDiv(data.items[x]);
+						var div      = itemToDiv(data.items[x], x);
 						$("#content").append(div);
 
 						var hr       = $("<hr>");
@@ -167,6 +240,8 @@
 							});
 						}, { context: '.contents', triggerOnce: true });
 					}
+	
+			 		$('#content').attr('itemCount', data.items.length);
 
 					//next item set loader waypoint
 					var nextPageDiv = $("<div>").text('The next items will load when this hits the top of the window...');
@@ -307,7 +382,7 @@
 
 								for (var x = 0; x < data.items.length; x++)
 								{
-									var div = itemToDiv(data.items[x]);
+									var div = itemToDiv(data.items[x], x);
 									$("#content").append(div);
 								}
 							});
@@ -334,12 +409,49 @@
 				});
 		 	}
 
+		 	function loadTags()
+		 	{
+		 		$("#availableTags").empty();
+
+				$.post("getTags.php",
+				{
+				}, function(data) {
+					data = decodeJSON(data);
+					if (!data.tags)
+						return;
+	
+					var selects = new Array();
+					selects.push('#availableTags');
+					contentCount = parseInt($('#content').attr('itemCount'));
+					for (var item = 0; item < contentCount; item++)
+						selects.push('#tagSelect' + item);
+
+					for (var item = 0; item < contentCount; item++)
+					{
+						if (item != 0)
+						{
+							var option = $("<option>").text('Select tag to add');
+							option.attr('value', -1);
+							$(selects[item]).append(option);
+						}
+						
+						for (var x = 0; x < data.tags.length; x++)
+						{
+							var option = $("<option>").text(data.tags[x].name);
+							option.attr('value', data.tags[x].id);
+							$(selects[item]).append(option);
+						}
+					}
+				});
+		 	}
+
 			$(document).ready(function() {
 		 		$('#content').attr('currentSiteId', -2);
 		 		$('#content').attr('pendingMarks', 0);
 
 				loadSites();
 				loadItems(-1);
+				loadTags();
 
 				$("#clearMessages").click(function() {
 					$('#messages').empty();
@@ -403,6 +515,7 @@
 				<li><a href="#manageSitesPane">Manage sites</a></li> 
 				<li><a href="#messagePane">Messages</a></li> 
 				<li><a href="#searchPane">Search</a></li> 
+				<li><a href="#tagPane">Tags</a></li> 
 			</ul> 
 			<div id='manageSitesPane'>
 				<form method='post' id='addForm'>
@@ -426,10 +539,15 @@
 					<select id='searchSiteList'>
 					</select>
 					&nbsp;for&nbsp;
-					<input id='searchTerm' type='TEXT' placeholder='Search term' size='50' />
+					<input id='searchTerm' type='TEXT' placeholder='E.g., title:android body:python' size='50' />
 					<a id='search' href='#'>Search</a>
 				</div>
 				<div id='searchResults' class='searchResults'></div>
+			</div>
+			<div id='tagPane'>
+				<select id='availableTags'>
+				</select>
+				<!-- TODO: make add/remove/view tag controls here -->
 			</div>
 
 			<script type="text/javascript"> 

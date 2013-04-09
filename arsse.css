@@ -47,11 +47,23 @@ div#sites
     padding: 5px;
 }
 
+span.tag
+{
+    background: #dddddd;
+    padding:    10px;
+}
+a.delete
+{
+    width:      16px;
+    height:     16px;
+    background: url(delete.png) no-repeat center center;
+}
+
 div#controlPanel
 {
     /*\*/
     position:   absolute;
-    top:        70%;
+    height:     200px;
     bottom:     20px;
     left:       210px;
     right:      30px;
