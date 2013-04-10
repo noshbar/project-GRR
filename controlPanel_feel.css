@@ -1,0 +1,41 @@
+/* Style for Usual tabs */
+.tab 
+{
+    padding: 15px 20px;
+    border:  1px;
+    margin:  8px auto;
+}
+
+.tab li
+{
+    list-style: none;
+    float:      left;
+}
+
+.tab ul a 
+{
+    display:     block;
+    padding:     6px 10px;
+    margin:      1px;
+    margin-left: 0;
+}
+
+.tab ul a.selected
+{
+    margin-bottom: 0;
+    border-bottom: 1px;
+}
+
+.tab div
+{
+    padding:       10px 10px 8px 10px;
+    *padding-top:  3px;
+    *margin-top:  -15px;
+    clear:         left;
+}
+
+form#addForm label
+{
+    float: left;
+    width: 100px;
+}

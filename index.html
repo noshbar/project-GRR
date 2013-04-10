@@ -2,7 +2,8 @@
 	<head>
 		<meta http-equiv="Cache-Control" content="no-cache">
 		<meta http-equiv='Content-Type'  content='text/html; charset=utf-8'>
-		<link href="arsse.css" rel="stylesheet">
+		<link href="arsse_feel.css" rel="stylesheet">
+		<link href="arsse_look.css" rel="stylesheet">
 		<!--[if lt IE 7]>
 		<style type="text/css" media="screen">
 			/* let the IE expressions commence */
@@ -17,7 +18,8 @@
 			}
 		</style>
 		<![endif]-->
-		<link href="controlPanel.css" rel="stylesheet">
+		<link href="controlPanel_feel.css" rel="stylesheet">
+		<link href="controlPanel_look.css" rel="stylesheet">
 
 		 <script type="text/javascript" src="jquery-1.9.1.min.js"></script>
 		 <script type="text/javascript" src="waypoints.min.js"></script>
@@ -490,9 +492,6 @@
 
 		 	function loadTags()
 		 	{
-		 		$("#availableTags").empty();
-		 		$("#searchTagList").empty();
-
 				$.post("getTags.php",
 				{
 				}, function(data) {
@@ -501,19 +500,20 @@
 						return;
 	
 					var selects = new Array();
-					selects.push('#availableTags');
 					selects.push('#searchTagList');
+					selects.push('#availableTags');
 					contentCount = parseInt($('#content').attr('itemCount'));
 					for (var item = 0; item < contentCount; item++)
 						selects.push('#tagSelect' + item);
 
-					for (var item = 0; item < contentCount; item++)
+					for (var item = 0; item < selects.length; item++)
 					{
 						$(selects[item]).empty();
 
-						if (item <= 1)
+						if (item == 0 || item > 1)
 						{
-							var option = item == 0 ? $("<option>").text('Select tag to add') : $("<option>").text('any tag');
+							var text = (item == 0) ? 'any tag' : 'Select tag to add';
+							var option = $("<option>").text(text);
 							option.attr('value', -1);
 							$(selects[item]).append(option);
 						}

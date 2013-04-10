@@ -1,0 +1,39 @@
+/* Style for Usual tabs */
+.tab 
+{
+    background:#181818;
+    color:#111;
+    border:solid #222;
+    margin:auto;
+}
+
+.tab ul a 
+{
+    text-decoration: none!important;
+    color:           #FFF;
+    background:      #444;
+}
+
+.tab ul a:hover
+{
+    color:      #FFF;
+    background: #111;
+}
+
+.tab ul a.selected
+{
+    color:         #000;
+    background:    snow;
+    border-bottom: snow;
+    cursor:        default;
+}
+
+.tab div
+{
+    background: snow;
+}
+
+.tab div a
+{
+    color: #000;
+}

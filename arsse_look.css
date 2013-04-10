@@ -1,0 +1,37 @@
+body
+{
+    font-family: arial, sans-serif;
+    background:  #000000;
+}
+
+div.statusMessage
+{
+    background: #aaaaff;
+}
+
+span.tag
+{
+    background: #dddddd;
+    border:     #000;
+    font-size:  75%;
+}
+
+div#controlPanel
+{
+    background: #dddddd;
+}
+
+a.hide
+{
+    background: url(close.png) no-repeat center center;
+}
+
+#content
+{
+    background: #ffffff;
+}
+
+#siteList
+{
+    background: #ffffff;
+}
