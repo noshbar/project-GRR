@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'utils.php';
 
 $tagId      = $_POST['id'];
 $query      = "UPDATE tags SET deleted=1 WHERE id=?;";

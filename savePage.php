@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'utils.php';
 
 /* TODO: make engine options:
    curl : use curl and parse the DOM for SRC elements to retreive too

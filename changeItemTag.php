@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'utils.php';
 
 $result['action'] = $_POST['action'];
 $result['item']   = $_POST['item'];

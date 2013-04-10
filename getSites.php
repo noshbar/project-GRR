@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'utils.php';
 
 $db = openDatabase('test.db');
 $prepared = $db->prepare("SELECT id, name, source, deleted FROM site WHERE deleted=0");

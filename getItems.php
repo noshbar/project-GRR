@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'utils.php';
 
 $maxItems = 10;
 if (isset($_POST['maxItems']))

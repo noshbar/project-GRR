@@ -1,7 +1,7 @@
 <?php
 
 require_once 'feed.class.php';
-require_once 'database.php';
+require_once 'utils.php';
 
 function updateFeed($Database, $Site)
 {

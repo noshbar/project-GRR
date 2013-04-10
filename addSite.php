@@ -1,5 +1,5 @@
 <?php
-require_once 'database.php';
+require_once 'utils.php';
 require_once 'update.php';
 
 function addSite($Database, $Site)
