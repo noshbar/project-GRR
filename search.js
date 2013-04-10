@@ -73,3 +73,11 @@ function search(term, siteId, tagId)
         }
     });
 }
+
+function startSearch()
+{
+    searchTerm = $("#searchTerm").val();
+    siteId     = $("#searchSiteList").val();
+    tagId      = $("#searchTagList").val();
+    search(searchTerm, siteId, tagId);
+}
