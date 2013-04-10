@@ -27,6 +27,7 @@ function onShowItem(id)
             var div = itemToDiv(data.items[x], x); //from items.js
             $("#content").append(div);
         }
+        setTimeout(loadTags, 100);
     });
 }
 

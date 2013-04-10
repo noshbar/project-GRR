@@ -68,6 +68,7 @@
                     $("a","ul").removeClass("selected") 
                     .filter("[href='#messagePane']","ul").addClass("selected"); 
                     $("#manageSitesPane").hide();
+                    $("#manageTagsPane").hide();
                     $("#searchPane").hide();
                     $("#messagePane").show();
                     $("#newMessageAlert").hide();
@@ -77,10 +78,15 @@
                     $("#newMessageAlert").hide();
                 });
 
-                $("#addTagButton").click(function() {
-                    var tagName = $("#addTagName").val();
-                    addTag(tagName);
+                $("#addTagButton").click(onAddTag);
+                $("#addTagName").keypress(function(event) {
+                    if (event.which == 13)
+                    {
+                        onAddTag();
+                        event.preventDefault();
+                    }
                 });
+
                 $("#removeTagButton").click(function() {
                     var tagId = $("#availableTags").val();
                     removeTag(tagId);
@@ -92,8 +98,6 @@
                 });
 
                 $("#controlPanel").hide();
-
-                setTimeout(loadTags, 300);
             });
             
          </script> 

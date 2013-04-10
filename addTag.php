@@ -9,9 +9,10 @@ $parameters = array($tagName);
 
 $db = openDatabase('test.db');
 $prepared = $db->prepare($query);
-$prepared->execute($parameters);
+if (!$prepared->execute($parameters))
+	quit("Could not add tag '$tagName' (".$prepared->errorInfo()[2].")");
 
-$result['result'] = 'Tag added.';
+$result['result'] = "Tag '$tagName' added.";
 echo(json_encode($result));
 
 ?>

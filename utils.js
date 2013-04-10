@@ -10,7 +10,7 @@ function decreaseCount(siteName)
     }
 }
 
-function addStatusMessage(message)
+function addStatusMessage(message, disableAlert)
 {
     if (!message)
         return;
@@ -18,7 +18,8 @@ function addStatusMessage(message)
     var div = $('<div>').html(message);
     div.attr('class', 'statusMessage');
     $('#messages').prepend(div);
-    $('#newMessageAlert').show();
+    if (!disableAlert)
+        $('#newMessageAlert').show();
 }
 
 function decodeJSON(data)

@@ -1,3 +1,9 @@
+function onAddTag()
+{
+    var tagName = $("#addTagName").val();
+    addTag(tagName);
+}
+
 function makeTagSpan(selectBoxName, itemId, tagId, text)
 {
     var tagSpan = $('<span>').text(text + ' ');
@@ -57,6 +63,9 @@ function addTag(tagName)
         if (!data)
             return;
 
+        $('#addTagName').val('');
+        $('#addTagName').attr('placeholder', data.result);
+        addStatusMessage(data.result, true);
         loadTags();
     });
 }

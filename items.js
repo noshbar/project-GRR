@@ -164,5 +164,6 @@ function loadItems(siteId)
         var footerDiv = $("<div>").css('height','100%');
         footerDiv.attr('id', 'footerDiv');
         $("#content").append(footerDiv);
+        setTimeout(loadTags, 100);
     });
 }
