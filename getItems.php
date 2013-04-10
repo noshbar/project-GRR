@@ -43,6 +43,20 @@ foreach ($rows as $row)
 	$item['title']     = $row['title'];
 	$item['contents']  = $row['body'];
 	$item['timestamp'] = date("F j, Y, g:i a", (int)$row['timestamp']);
+
+	{
+		$parameters   = array($row['id']);
+		$query        = 'SELECT tags.name, tags.id, taggedItems.tagId FROM tags, taggedItems WHERE tags.id=taggedItems.tagId AND taggedItems.itemId=? AND tags.deleted=0';
+		$prepared     = $db->prepare($query);
+		$prepared->execute($parameters);
+		$tags         = $prepared->fetchAll(); 
+		$item['tags'] = array();
+		foreach ($tags as $tag)
+		{
+			array_push($item['tags'], $tag);
+		}
+	}
+
 	$result['items'][$index++] = $item;
 }
 $result['count'] = $index;

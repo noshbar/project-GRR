@@ -49,14 +49,13 @@ div#sites
 
 span.tag
 {
-    background: #dddddd;
-    padding:    10px;
-}
-a.delete
-{
-    width:      16px;
-    height:     16px;
-    background: url(delete.png) no-repeat center center;
+    padding:               5px;
+    background:            #dddddd;
+    -moz-border-radius:    10px; /* Mozilla */
+    -webkit-border-radius: 10px; /* Webkit */
+    border-radius:         10px;
+    border:                1px solid #000;
+    font-size:             75%;
 }
 
 div#controlPanel

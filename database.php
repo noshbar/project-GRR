@@ -15,7 +15,7 @@ function openDatabase($Filename)
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 		if (!$existed)
 		{
-			$tables['tags']        = 'CREATE TABLE tags(id INTEGER PRIMARY KEY, name TEXT UNIQUE);';
+			$tables['tags']        = 'CREATE TABLE tags(id INTEGER PRIMARY KEY, name TEXT UNIQUE, deleted BOOLEAN DEFAULT 0);';
 			$tables['taggedItems'] = 'CREATE TABLE taggedItems(id INTEGER PRIMARY KEY, tagId INTEGER, itemId INTEGER);';
 			$tables['site']        = 'CREATE TABLE site(id INTEGER PRIMARY KEY, name TEXT UNIQUE, source TEXT, deleted BOOLEAN DEFAULT 0);';
 			$tables['contents']    = 'CREATE VIRTUAL TABLE contents USING fts4(title, body);';

@@ -75,6 +75,56 @@
 				return null;
 		 	}
 
+		 	function makeTagSpan(selectBoxName, itemId, tagId, text)
+		 	{
+		 		//alert(selectBoxName + ':' + itemId + ':' + tagId + ':' + text);
+				var tagSpan = $('<span>').text(text + ' ');
+				tagSpan.attr('class',     'tag');
+				tagSpan.attr('id',        'tagSpan' + itemId + "_" + tagId);
+				tagSpan.attr('tagId',     tagId);
+
+				var hideButton  = $('<img>');
+				hideButton.attr('src', 'delete.png');
+
+				var hideTag     = $('<a>');
+				hideTag.append(hideButton);
+				hideTag.attr('href',      '#');
+				hideTag.attr('itemId',    itemId);
+				hideTag.attr('tagText',   text);
+				hideTag.attr('tagId',     tagId);
+				hideTag.attr('selectBox', selectBoxName);
+				hideTag.click(function() {
+					var itemId    = $(this).attr('itemId');
+					var tagText   = $(this).attr('tagText');
+					var tagId     = $(this).attr('tagId');
+					var selectBox = $(this).attr('selectBox');
+					var selectDiv = $(selectBox).attr('tagsDivId');
+
+					$.post("changeItemTag.php",
+					{
+						action:  'remove',
+						item:    itemId,
+						tag:     tagId,
+						text:    tagText,
+						select:  selectBox,
+						div:     selectDiv
+					},
+					function(data, status) {
+						data = decodeJSON(data);
+						if (!data || !data.select) //failure handled by decodeJSON
+							return;
+
+						var option  = $("<option>").text(data.text);
+						option.attr('value', data.tag);
+						$('#tagSpan'+data.item+'_'+data.tag).remove();
+						$(data.select).append(option);
+					});					
+				});
+
+				tagSpan.append(hideTag);
+				return tagSpan;
+		 	}
+
 		 	function itemToDiv(item, index)
 		 	{
 				var itemIdValue = item.itemId; //sigh, something is nuking this value
@@ -116,73 +166,59 @@
 				div.append($("<br>"));
 
 				//tags
-				var tagDiv    = $("<div>");
+				var tagsDiv    = $("<div>");
 				var tagSelect = $("<select>");
 
-				tagDiv.attr('id', 'tagDiv' + index);
+				tagsDiv.attr('id', 'tagsDiv' + index);
 
 				tagSelect.attr('id', 'tagSelect' + index);
 				tagSelect.attr('itemId', itemIdValue);
-				tagSelect.attr('tagDivId', '#tagDiv' + index);
+				tagSelect.attr('tagsDivId', '#tagsDiv' + index);
 				tagSelect.change(function() {
 					//oh there has to be a better way of doing this...
 					var tagId = $(this).val();
 					if (tagId == -1)
 						return;
 
-					var elementName = $(this).attr('id');
-					var itemId      = $(this).attr('itemId');
-					var tagText     = $('#'+elementName+' option:selected').text();
-					var tagDivId    = $(this).attr('tagDivId');
+					var elementName = '#' + $(this).attr('id');
+					var tagText     = $(elementName+' option:selected').text();
+					var tagsDivId   = $(this).attr('tagsDivId');
 
-					//add it to the tag div
-					var tagSpan     = $('<span>').text(tagText + ' ');
-					var hideTag     = $('<a>');
-					var hideButton  = $('<sup>').text('X');
+					$.post("changeItemTag.php",
+					{
+						action:  'add',
+						item:    itemIdValue,
+						tag:     tagId,
+						text:    tagText,
+						select:  elementName,
+						div:     tagsDivId
+					},
+					function(data, status) {
+						data = decodeJSON(data);
+						if (!data || !data.select) //failure handled by decodeJSON
+							return;
 
-					tagSpan.attr('class',     'tag');
-					tagSpan.attr('id',        'tagSpan' + tagId);
-
-					//hideTag.attr('class',   'hide');
-					hideTag.attr('href',      '#');
-					hideTag.attr('itemId',    itemId);
-					hideTag.attr('tagText',   tagText);
-					hideTag.attr('tagId',     tagId);
-					hideTag.attr('selectBox', '#'+elementName);
-					hideTag.click(function() {
-						var itemId  = $(this).attr('itemId');
-						var tagText = $(this).attr('tagText');
-						var tagId   = $(this).attr('tagId');
-						var select  = $(this).attr('selectBox');
-
-						var option  = $("<option>").text(tagText);
-						option.attr('value', tagId);
-
-						$('#tagSpan'+tagId).remove();
-						$(select).append(option);
-
-						//TODO: update DB - remove tag:item combo
+						$(data.select+" option[value='"+data.tag+"']").remove();
+						$(data.div).append(makeTagSpan(data.select, data.item, data.tag, data.text));
 					});
-
-					hideTag.append(hideButton);
-					tagSpan.append(hideTag);
-					$(tagDivId).append(tagSpan);
-					//remove it from the list
-					$("#"+elementName+" option[value='"+tagId+"']").remove();
-
-					//TODO: update DB - add tag:item combo
 				});
 
-				tagDiv.append(tagSelect);
+				tagsDiv.append(tagSelect);
+				tagsDiv.append("&nbsp;");
+				div.append(tagsDiv);
+
+				//remove tags from the select list if they've already been applied to the item and make tag spans out of them
+				var noShow = new Array(); //array of tags not to display in the list
 				if (item.tags)
 				{
 					for (var x = 0; x < item.tags.length; x++)
 					{
-						var tag = $("<span>").text(item.tags[x]);
-						tagDiv.append(tag);
+						tagsDiv.append(makeTagSpan("#tagSelect" + index, itemIdValue, item.tags[x].tagId, item.tags[x].name));
+						tagsDiv.append("&nbsp;");
+						noShow.push(parseInt(item.tags[x].tagId));
 					}
 				}
-				div.append(tagDiv);
+				tagSelect.attr('noShow', noShow);
 
 				return div;	 		
 		 	}
@@ -409,6 +445,48 @@
 				});
 		 	}
 
+		 	function addTag(tagName)
+		 	{
+				$.post("addTag.php",
+				{
+					name: tagName
+				}, function(data) {
+					data = decodeJSON(data);
+					if (!data)
+						return;
+
+					loadTags();
+				});
+		 	}
+
+		 	function removeTag(tagId)
+		 	{
+				$.post("removeTag.php",
+				{
+					id: tagId
+				}, function(data) {
+					data = decodeJSON(data);
+					if (!data)
+						return;
+
+					loadTags();
+					$("span").each(function(index) {
+						var tag = $(this).attr('tagId');
+						if (tag && parseInt(tag) == parseInt(tagId))
+							$(this).remove();
+					});
+				});
+		 	}
+
+			function contains(vector, value)
+			{
+				var i = vector.length;
+				while (i--)
+					if (vector[i] === value)
+						return true;
+				return false;
+			}
+
 		 	function loadTags()
 		 	{
 		 		$("#availableTags").empty();
@@ -428,6 +506,8 @@
 
 					for (var item = 0; item < contentCount; item++)
 					{
+						$(selects[item]).empty();
+
 						if (item != 0)
 						{
 							var option = $("<option>").text('Select tag to add');
@@ -435,11 +515,15 @@
 							$(selects[item]).append(option);
 						}
 						
+						var noShow = $(selects[item]).attr('noShow');
 						for (var x = 0; x < data.tags.length; x++)
 						{
-							var option = $("<option>").text(data.tags[x].name);
-							option.attr('value', data.tags[x].id);
-							$(selects[item]).append(option);
+							if (!noShow || !contains(noShow, data.tags[x].id))
+							{
+								var option = $("<option>").text(data.tags[x].name);
+								option.attr('value', data.tags[x].id);
+								$(selects[item]).append(option);
+							}
 						}
 					}
 				});
@@ -451,7 +535,6 @@
 
 				loadSites();
 				loadItems(-1);
-				loadTags();
 
 				$("#clearMessages").click(function() {
 					$('#messages').empty();
@@ -474,7 +557,7 @@
 					$('#controlPanel').hide();
 				});
 				$("#showControlPanel").click(function() {
-					$('#controlPanel').show();
+					$('#controlPanel').toggle();
 				});
 
 				$("#newMessageAlert").hide();
@@ -492,7 +575,18 @@
 					$("#newMessageAlert").hide();
 				});
 
+				$("#addTagButton").click(function() {
+					var tagName = $("#addTagName").val();
+					addTag(tagName);
+				});
+				$("#removeTagButton").click(function() {
+					var tagId = $("#availableTags").val();
+					removeTag(tagId);
+				});
+
 				$("#controlPanel").hide();
+
+	 			setTimeout(loadTags, 300);
    			});
  			
 		 </script> 
@@ -513,9 +607,9 @@
 			<a id='hideControlPanel' class='hide' href="#"></a>
 			<ul> 
 				<li><a href="#manageSitesPane">Manage sites</a></li> 
+				<li><a href="#manageTagsPane">Manage Tags</a></li> 
 				<li><a href="#messagePane">Messages</a></li> 
 				<li><a href="#searchPane">Search</a></li> 
-				<li><a href="#tagPane">Tags</a></li> 
 			</ul> 
 			<div id='manageSitesPane'>
 				<form method='post' id='addForm'>
@@ -526,6 +620,24 @@
 						<label for='siteSource'>Source:</label>
 						<input id='siteSource' type='TEXT' placeholder='E.g., http://www.engadget.com/rss.xml' size='100' /><br />
 						<a id='addSite' href='#'>Add</a>
+					</fieldset>
+				</form>
+			</div>
+			<div id='manageTagsPane'>
+				<form method='post' id='addTagForm'>
+					<fieldset>
+						<legend>Add tag</legend>
+						<label for='addTagName'>Name:</label>
+						<input id='addTagName' type='TEXT' placeholder='E.g., Technology, Cooking, etc.' size='50' />
+						<a id='addTagButton' href='#'>Add</a>
+					</fieldset>
+				</form>
+				<form method='post' id='removeTagForm'>
+					<fieldset>
+						<legend>Remove tag</legend>
+						<select id='availableTags'>
+						</select>
+						<a id='removeTagButton' href='#'>Remove</a>
 					</fieldset>
 				</form>
 			</div>
@@ -540,14 +652,10 @@
 					</select>
 					&nbsp;for&nbsp;
 					<input id='searchTerm' type='TEXT' placeholder='E.g., title:android body:python' size='50' />
+					<!-- TODO: add tag searching here -->
 					<a id='search' href='#'>Search</a>
 				</div>
 				<div id='searchResults' class='searchResults'></div>
-			</div>
-			<div id='tagPane'>
-				<select id='availableTags'>
-				</select>
-				<!-- TODO: make add/remove/view tag controls here -->
 			</div>
 
 			<script type="text/javascript"> 
