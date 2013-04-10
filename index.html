@@ -359,14 +359,15 @@
 				});
 		 	}
 
-		 	function search(term, siteId)
+		 	function search(term, siteId, tagId)
 		 	{
 		 		$("#searchResults").empty();
 
 				$.post("search.php",
 				{
 					searchTerm : term,
-					site       : siteId
+					site       : siteId,
+					tag        : tagId
 				}, function(data) {
 					data = decodeJSON(data);
 					if (!data || !data.items || !data.items.length)
@@ -490,6 +491,7 @@
 		 	function loadTags()
 		 	{
 		 		$("#availableTags").empty();
+		 		$("#searchTagList").empty();
 
 				$.post("getTags.php",
 				{
@@ -500,6 +502,7 @@
 	
 					var selects = new Array();
 					selects.push('#availableTags');
+					selects.push('#searchTagList');
 					contentCount = parseInt($('#content').attr('itemCount'));
 					for (var item = 0; item < contentCount; item++)
 						selects.push('#tagSelect' + item);
@@ -508,9 +511,9 @@
 					{
 						$(selects[item]).empty();
 
-						if (item != 0)
+						if (item <= 1)
 						{
-							var option = $("<option>").text('Select tag to add');
+							var option = item == 0 ? $("<option>").text('Select tag to add') : $("<option>").text('any tag');
 							option.attr('value', -1);
 							$(selects[item]).append(option);
 						}
@@ -527,6 +530,14 @@
 						}
 					}
 				});
+		 	}
+
+		 	function startSearch()
+		 	{
+				searchTerm = $("#searchTerm").val();
+				siteId     = $("#searchSiteList").val();
+				tagId      = $("#searchTagList").val();
+				search(searchTerm, siteId, tagId);
 		 	}
 
 			$(document).ready(function() {
@@ -547,11 +558,7 @@
 					addSite(title, url);
 				});
 
-				$("#search").click(function() {
-					searchTerm = $("#searchTerm").val();
-					siteId = $("#searchSiteList").val();
-					search(searchTerm, siteId)
-				});
+				$("#search").click(startSearch);
 
 				$("#hideControlPanel").click(function() {
 					$('#controlPanel').hide();
@@ -650,6 +657,9 @@
 				<div>
 					<select id='searchSiteList'>
 					</select>
+					&nbsp;marked with&nbsp;
+					<select id='searchTagList'>
+					</select>
 					&nbsp;for&nbsp;
 					<input id='searchTerm' type='TEXT' placeholder='E.g., title:android body:python' size='50' />
 					<!-- TODO: add tag searching here -->
@@ -670,11 +680,7 @@
 		<script>
 			$("#searchTerm").keypress(function(event) {
 				if (event.which == 13)
-				{
-					searchTerm = $("#searchTerm").val();
-					siteId = $("#searchSiteList").val();
-					search(searchTerm, siteId)
-				}
+					startSearch();
 			});
 		</script>
 

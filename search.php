@@ -1,14 +1,30 @@
 <?php
 require_once 'database.php';
 
-$db             = openDatabase('test.db');
-$parameters     = array($_POST['searchTerm']);
-$query          = 'SELECT item.id, site.name, contents.title FROM site, item, contents WHERE item.contentId=contents.docid AND site.id=item.siteId AND contents MATCH ?';
+$db         = openDatabase('test.db');
+$parameters = array();
+
+if (isset($_POST['tag']) && ($_POST['tag'] != -1))
+{
+    $query  = 'SELECT item.id, site.name, contents.title FROM site, item, contents WHERE item.contentId=contents.docid AND site.id=item.siteId AND item.id IN (SELECT taggedItems.itemId FROM taggedItems WHERE tagId = ?)';
+    array_push($parameters, $_POST['tag']);
+    error.log($query);
+}
+else
+{
+    $query  = 'SELECT item.id, site.name, contents.title FROM site, item, contents WHERE item.contentId=contents.docid AND site.id=item.siteId';
+}
 
 if (isset($_POST['site']) && ($_POST['site'] != -1))
 {
     $query .= ' AND item.siteId=?';
     array_push($parameters, $_POST['site']);
+}
+
+if (isset($_POST['searchTerm']) && $_POST['searchTerm'] != '')
+{
+    $query .= ' AND contents MATCH ?';
+    array_push($parameters, $_POST['searchTerm']);
 }
 
 $query .= ' ORDER BY timestamp ASC';
