@@ -48,7 +48,11 @@ function loadSites()
                 addSiteToList(data.sites[x].siteName, data.sites[x].siteId, data.sites[x].unread);
                 totalUnread += parseInt(data.sites[x].unread);
             }
-        }                   
+        }
+        else
+        {
+            $('#controlPanel').show();
+        }
         $('#counterAll').attr('unreadCount', totalUnread);
         $('#counterAll').attr('lastItemId', data.lastItemId);
         $('#counterAll').text(' (' + totalUnread + ')');

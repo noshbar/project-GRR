@@ -46,7 +46,7 @@ div.contentItem
     padding: 20px;
 }
 
-div#sites
+div.padded
 {
     padding: 5px;
 }
