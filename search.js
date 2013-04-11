@@ -9,7 +9,8 @@ function makeLocalCopyLink(href)
 
 function onShowItem(id)
 {
-    $('#content').empty();
+    clearContent();
+    
     $.post("getItems.php",
     {
         itemId: id

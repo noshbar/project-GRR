@@ -68,7 +68,6 @@ function addSite(title, url)
     }, function(data) {
         data = decodeJSON(data);
         addSiteToList(data.site.name, data.site.id, data.site.unread);
-        disableWayPoints();
         loadItems(data.site.id);
         var totalUnread = parseInt($('#counterAll').attr('unreadCount'));
         totalUnread += data.site.unread;

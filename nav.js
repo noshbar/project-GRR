@@ -6,7 +6,7 @@ function nextPage()
     if (pending > 0)
         setTimeout(nextPage, 200);
     else
-        loadItems($('#content').attr('currentSiteId'));
+        loadItems(parseInt($('#content').attr('currentSiteId')));
 }
 
 function disableWayPoints()
@@ -14,5 +14,6 @@ function disableWayPoints()
     $('#content hr').each( function(index, element) {
         $(this).waypoint('destroy');
     });
-    $('#nextPageDiv').waypoint('destroy');
+    if ($('#nextPageDiv'))
+        $('#nextPageDiv').waypoint('destroy');
 }

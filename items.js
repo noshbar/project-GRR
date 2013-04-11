@@ -99,7 +99,8 @@ function itemToDiv(item, index)
 function loadItems(siteId)
 {
     currentSiteId = $('#content').attr('currentSiteId');
-    $('#content').empty();
+
+    clearContent();
 
     $('#content').attr('currentSiteId', siteId);
     lastItemId = $('#counterAll').attr('lastItemId');
@@ -151,6 +152,10 @@ function loadItems(siteId)
         }
 
         $('#content').attr('itemCount', data.items.length);
+
+        //padding between last item and next page waypoint
+        var spacerDiv = $("<div>").css('height','50%');
+        $("#content").append(spacerDiv);
 
         //next item set loader waypoint
         var nextPageDiv = $("<div>").text('The next items will load when this hits the top of the window...');

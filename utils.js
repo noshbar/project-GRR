@@ -1,3 +1,10 @@
+function clearContent()
+{
+    disableWayPoints();
+    $('#content').empty();
+    $('#content').attr('currentSiteId', -1);
+}
+
 function decreaseCount(siteName)
 {
     for (var f = 0; f < 2; f++)

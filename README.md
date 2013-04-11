@@ -34,7 +34,7 @@ However, this is my first real attempt at using jQuery and HTML5 and the magic a
 - [ ] This currently looks like the enchanted upchuck of Satan himself. The idea is to get something working, then make it themeable or something.
 - [X] If the update.php script runs while you're reading items the new-item count in your view won't update, so if you keep reading all the way up to the new items, the unread count will start going into the negatives
 - [ ] The error-checking is abysmal if it's even present
-- [ ] Searching then selecting an article followed by clicking on a site from the site pane marks all items as read in the most horrific way possible.
+- [X] Searching then selecting an article followed by clicking on a site from the site pane marks all items as read in the most horrific way possible.
 
 #How to use
 
