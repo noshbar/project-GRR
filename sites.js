@@ -29,6 +29,9 @@ function addSiteToList(siteName, siteId, siteUnread)
 
 function loadSites()
 {
+    clearContent();
+    $('#sites').empty();
+
     $.post("getSites.php",
     function(data, status) {
         addSiteToList('All', -1, 0);
@@ -67,11 +70,7 @@ function addSite(title, url)
         siteSource:url
     }, function(data) {
         data = decodeJSON(data);
-        addSiteToList(data.site.name, data.site.id, data.site.unread);
-        loadItems(data.site.id);
-        var totalUnread = parseInt($('#counterAll').attr('unreadCount'));
-        totalUnread += data.site.unread;
-        $('#counterAll').attr('unreadCount', totalUnread);
-        $('#counterAll').text(' (' + totalUnread + ')');
+        loadSites();
+        loadItems(-1);
     });
 }
