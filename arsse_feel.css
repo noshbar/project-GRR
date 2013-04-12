@@ -11,7 +11,7 @@ div
     padding: 0;
 }
 
-#content
+div.contents
 {
     /*\*/
     position: absolute;
@@ -49,6 +49,11 @@ div.contentItem
 div.padded
 {
     padding: 5px;
+}
+
+div.nextPagePadding
+{
+    height: 100%;
 }
 
 span.tag

@@ -153,22 +153,33 @@ function loadItems(siteId)
 
         $('#content').attr('itemCount', data.items.length);
 
-        //padding between last item and next page waypoint
-        var spacerDiv = $("<div>").css('height','50%');
-        $("#content").append(spacerDiv);
-
         //next item set loader waypoint
         var nextPageDiv = $("<div>").text('The next items will load when this hits the top of the window...');
         nextPageDiv.attr('id', 'nextPageDiv');
         $("#content").append(nextPageDiv);
-        $('#nextPageDiv').waypoint(function() {
-            window.setTimeout(nextPage, 100);
-        }, { context: '.contents', triggerOnce: true });
+
+        //next page event occurs when this div scrolls to the end
+        $("#container").scroll(function() {
+            var container = $('#container');
+            if (parseInt(container.attr('busy')) == 1)
+                return;
+
+            var content   = $('#content');
+            var position  = Math.abs(content.offset().top) + container.height() + container.offset().top + 5; //+5 because it sometimes comes up a bit short
+            var height    = content.outerHeight();
+            if (height > 0 && position >= height)
+            {
+                container.attr('busy', 1);
+                window.setTimeout(nextPage, 100);
+            }
+        });        
 
         //padding at the bottom to enable the HR of the last item to hit the top of the screen and trigger it being read
-        var footerDiv = $("<div>").css('height','100%');
-        footerDiv.attr('id', 'footerDiv');
+        var footerDiv = $("<div>");
+        footerDiv.attr('id',    'footerDiv');
+        footerDiv.attr('class', 'nextPagePadding');
         $("#content").append(footerDiv);
         loadTags();
+        $('#container').attr('busy', 0);
     });
 }

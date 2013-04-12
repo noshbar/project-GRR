@@ -27,6 +27,11 @@ a.hide
     background: url(close.png) no-repeat center center;
 }
 
+#container
+{
+    background: #ffffff;
+}
+
 #content
 {
     background: #ffffff;
@@ -35,4 +40,9 @@ a.hide
 #siteList
 {
     background: #ffffff;
+}
+
+div.nextPagePadding
+{
+    background: #dddddd;
 }

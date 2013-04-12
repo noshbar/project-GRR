@@ -14,6 +14,4 @@ function disableWayPoints()
     $('#content hr').each( function(index, element) {
         $(this).waypoint('destroy');
     });
-    if ($('#nextPageDiv'))
-        $('#nextPageDiv').waypoint('destroy');
 }
