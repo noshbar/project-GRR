@@ -88,7 +88,7 @@
  */
 class WkHtmlToPdf
 {
-    protected $bin = '/usr/bin/wkhtmltopdf';
+    protected $bin = '';
 
     protected $enableEscaping = true;
 
@@ -110,6 +110,11 @@ class WkHtmlToPdf
      */
     public function __construct($options=array())
     {
+        if (stristr(PHP_OS, 'WIN'))
+            $bin = 'C:\Program Files (x86)\wkhtmltopdf\wkhtmltopdf.exe';
+        else
+            $bin = shell_exec('which wkhtmltopdf');
+
         if($options!==array())
             $this->setOptions($options);
     }
@@ -306,24 +311,24 @@ class WkHtmlToPdf
 
             $result = proc_close($process);
 //d
-            error_log("wk status: $result");
-            if($result===2)
+            if($result != 0)
             {
-                if (filesize($fileName) == 0)
+                if ($result===2)
                 {
-                    $this->error = "Could not run command $command:\n$stderr";
+                    if (filesize($fileName) == 0)
+                    {
+                        $this->error = "Could not run command $command:\n$stderr";
+                    }
+                    else
+                    {
+                        $this->error = 'Warning: an error occurred while creating the PDF, but some data was written';
+                        return true;
+                    }
                 }
                 else
                 {
-                    $this->error = 'Warning: an error occurred while creating the PDF, but some data was written';
-                    return true;
+                    $this->error = "Could not run command $command:\n$stderr";
                 }
-            }
-            else
-            {
-                error_log($command);
-                error_log($stderr);
-                $this->error = "Could not run command $command:\n$stderr";
             }
 //d/
         } else

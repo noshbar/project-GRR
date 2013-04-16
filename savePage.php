@@ -10,7 +10,12 @@ require_once 'utils.php';
 $tryCurl  = function_exists('curl_init');
 $tryWk    = FALSE;
 
-$wkhtmltopdf = shell_exec('which wkhtmltopdf');
+$wkhtmltopdf = '';
+if (stristr(PHP_OS, 'WIN') && file_exists('C:\Program Files (x86)\wkhtmltopdf\wkhtmltopdf.exe'))
+    $wkhtmltopdf = 'C:\Program Files (x86)\wkhtmltopdf\wkhtmltopdf.exe';
+else
+    $wkhtmltopdf = shell_exec('which wkhtmltopdf');
+
 if (!empty($wkhtmltopdf))
 {
 	require_once 'WkHtmlToPdf.php';
@@ -19,9 +24,12 @@ if (!empty($wkhtmltopdf))
 
 function savePageWkhtml($url, $filename)
 {
+    global $wkhtmltopdf;
+
     $result['result'] = FALSE;
 
-	$pdf = new WkHtmlToPdf;	
+    $options = array('bin' => $wkhtmltopdf);
+	$pdf = new WkHtmlToPdf($options);
 	$pdf->addPage($url);
 	if (!$pdf->saveAs($filename))
     {
