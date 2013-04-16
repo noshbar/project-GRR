@@ -15,7 +15,7 @@ function markItem($Database, $ItemId)
 	}
 }
 
-$db = openDatabase('test.db');
+$db = openDatabase();
 $itemId = $_POST['itemId'];
 $action = $_POST['action'];
 

@@ -121,7 +121,7 @@ if (isset($argv[1]))
 if ($itemId == -1)
 	die();
 
-$db         = openDatabase('test.db');
+$db         = openDatabase();
 $query      = 'SELECT site.name, item.source, contents.title FROM site, item, contents WHERE site.id=item.siteId AND contents.docid=item.id AND item.id = ?';
 $parameters = array($itemId);
 

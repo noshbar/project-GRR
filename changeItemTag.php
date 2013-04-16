@@ -15,7 +15,7 @@ elseif ($result['action'] == 'remove')
 
 $parameters = array($result['tag'], $result['item']);
 
-$db = openDatabase('test.db');
+$db = openDatabase();
 $prepared = $db->prepare($query);
 $prepared->execute($parameters);
 

@@ -5,7 +5,7 @@ $tagId      = $_POST['id'];
 $query      = "UPDATE tags SET deleted=1 WHERE id=?;";
 $parameters = array($tagId);
 
-$db = openDatabase('test.db');
+$db = openDatabase();
 $prepared = $db->prepare($query);
 $prepared->execute($parameters);
 

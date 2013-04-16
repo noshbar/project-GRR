@@ -1,7 +1,7 @@
 <?php
 require_once 'utils.php';
 
-$db = openDatabase('test.db');
+$db = openDatabase();
 $prepared = $db->prepare("SELECT id, name FROM tags WHERE deleted=0");
 $prepared->execute();
 $rows = $prepared->fetchAll(); 

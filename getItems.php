@@ -5,7 +5,7 @@ $maxItems = 10;
 if (isset($_POST['maxItems']))
     $maxItems = $_POST['maxItems'];
 
-$db             = openDatabase('test.db');
+$db             = openDatabase();
 $parameters     = array();
 $query          = 'SELECT item.id, site.name, item.source, item.timestamp, contents.title, contents.body FROM site, item, contents WHERE site.id=item.siteId AND contents.docid=item.contentId';
 if (isset($_POST['site']) && ($_POST['site'] != -1))

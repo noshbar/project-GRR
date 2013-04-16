@@ -7,7 +7,7 @@ $tagName = $_POST['name'];
 $query      = "INSERT INTO tags(name, deleted) VALUES(?, 0);";
 $parameters = array($tagName);
 
-$db = openDatabase('test.db');
+$db = openDatabase();
 $prepared = $db->prepare($query);
 if (!$prepared->execute($parameters))
 	quit("Could not add tag '$tagName' (".$prepared->errorInfo()[2].")");

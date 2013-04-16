@@ -72,7 +72,7 @@ function updateSites($Database, $SiteId = -1)
 	return $result;
 }
 
-$db = openDatabase('test.db');
+$db = openDatabase();
 
 if (isset($_SERVER['TERM']) || (isset($_POST['id']) && $_POST['id'] == 'all'))
 	updateSites($db);

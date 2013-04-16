@@ -1,7 +1,7 @@
 <?php
 require_once 'utils.php';
 
-$db         = openDatabase('test.db');
+$db         = openDatabase();
 $parameters = array();
 
 if (isset($_POST['tag']) && ($_POST['tag'] != -1))

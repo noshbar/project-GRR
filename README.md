@@ -1,17 +1,8 @@
-codename-aRSSe
-==============
+project-GRR
+===========
 
-Advanced RSS Engine (Google-Reader-ish replacement)
-
-#Introduction
-
-Google Reader is going out of action on the 1st of June 2013.
-
-This makes me sad.
-
-So I'm going to try and make a clone of it that implements the functionality I use in Google Reader as well as add features that I think it should have had ages ago.
-
-However, this is my first real attempt at using jQuery and HTML5 and the magic associated with it, so this really is just a hack for now.
+![logo](docs/grr.png "GRR!")
+Google Reader Replacement
 
 #Features (so far)
 
@@ -23,7 +14,6 @@ However, this is my first real attempt at using jQuery and HTML5 and the magic a
 
 #Features (TODO)
 
-- [ ] Make all the new items searchable
 - [ ] Add the ability to save the contents of an entry to disk (i.e., fetch the page the news item points to, along with all its resources and save it to disk)
 - [ ] Add the ability to filter out posts containing keywords (e.g., "batman,spoilers")
 - [ ] Be able to flag posts as important if they contain specified keywords (e.g., "chris brown,horrific accident")
@@ -32,9 +22,7 @@ However, this is my first real attempt at using jQuery and HTML5 and the magic a
 #Bugs
 
 - [ ] This currently looks like the enchanted upchuck of Satan himself. The idea is to get something working, then make it themeable or something.
-- [X] If the update.php script runs while you're reading items the new-item count in your view won't update, so if you keep reading all the way up to the new items, the unread count will start going into the negatives
 - [ ] The error-checking is abysmal if it's even present
-- [X] Searching then selecting an article followed by clicking on a site from the site pane marks all items as read in the most horrific way possible.
 
 #How to use
 

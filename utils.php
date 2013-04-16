@@ -6,12 +6,13 @@ function quit($message)
     die(json_encode($result));
 }
 
-function openDatabase($Filename)
+function openDatabase()
 {
+	$filename = 'grr.db';
 	try
 	{
-		$existed = file_exists($Filename);
-		$db = new PDO("sqlite:$Filename");
+		$existed = file_exists($filename);
+		$db = new PDO("sqlite:$filename");
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 		if (!$existed)
 		{

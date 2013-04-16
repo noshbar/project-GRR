@@ -22,7 +22,7 @@ function addSite($Database, $Site)
 	return $result;
 }
 
-$db = openDatabase('test.db');
+$db = openDatabase();
 $site['name']    = $_POST['siteName'];
 $site['source']  = $_POST['siteSource'];
 $result['site']['unread'] = 0;
