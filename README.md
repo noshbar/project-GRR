@@ -1,7 +1,7 @@
 project-GRR
 ===========
 
-![logo](docs/grr.png "GRR!")
+![logo](doc/grr.png "GRR!")
 Google Reader Replacement
 
 #Features (so far)
