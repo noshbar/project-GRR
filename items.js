@@ -5,7 +5,7 @@ function itemToDiv(item, index)
     var div      = $("<div>");
     div.attr('class', 'contentItem');
     
-    var title    = $("<a>").text(item.siteId + ': ' + item.title);
+    var title    = $("<a>").text(item.siteName + ': ' + item.title);
     title.attr('href', item.source);
     
     var when     = $("<b>").text(item.timestamp + "   ");
@@ -96,6 +96,24 @@ function itemToDiv(item, index)
     return div;         
 }
 
+function markRead(site, item)
+{
+    $('#content').attr('pendingMarks', parseInt($('#content').attr('pendingMarks')) + 1);
+
+    $.post("markItem.php",
+    {
+        itemId:item,
+        siteId:site,
+        action:'read'
+    }, function(data) {
+        data = decodeJSON(data);
+        if (!data)
+            return;
+        $('#content').attr('pendingMarks', parseInt($('#content').attr('pendingMarks')) - 1);
+        decreaseCount(data.siteId);
+    });
+}
+
 function loadItems(siteId)
 {
     currentSiteId = $('#content').attr('currentSiteId');
@@ -103,7 +121,7 @@ function loadItems(siteId)
     clearContent();
 
     $('#content').attr('currentSiteId', siteId);
-    lastItemId = $('#counterAll').attr('lastItemId');
+    lastItemId = $('#counter-1').attr('lastItemId');
 
     $('#content').attr('itemCount', 0);
 
@@ -135,19 +153,9 @@ function loadItems(siteId)
             $("#content").append(hr);
 
             $(hr).waypoint(function() {
-                $('#content').attr('pendingMarks', parseInt($('#content').attr('pendingMarks')) + 1);
-
-                id = $(this).attr('itemId');
-                //should move this into the complete() function callback
-                decreaseCount($(this).attr('siteId'));
-                //
-                $.post("markItem.php",
-                {
-                    itemId:id,
-                    action:'read'
-                }, function() {
-                    $('#content').attr('pendingMarks', parseInt($('#content').attr('pendingMarks')) - 1);
-                });
+                id   = $(this).attr('itemId');
+                site = $(this).attr('siteId');
+                markRead(site, id);
             }, { context: '.contents', triggerOnce: true });
         }
 
@@ -181,5 +189,6 @@ function loadItems(siteId)
         $("#content").append(footerDiv);
         loadTags();
         $('#container').attr('busy', 0);
+        $('#content').focus();
     });
 }

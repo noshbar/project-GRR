@@ -7,7 +7,7 @@ if (isset($_POST['maxItems']))
 
 $db             = openDatabase();
 $parameters     = array();
-$query          = 'SELECT item.id, site.name, item.source, item.timestamp, contents.title, contents.body FROM site, item, contents WHERE site.id=item.siteId AND contents.docid=item.contentId';
+$query          = 'SELECT item.id as itemId, site.name, site.id as siteId, item.source, item.timestamp, contents.title, contents.body FROM site, item, contents WHERE site.id=item.siteId AND contents.docid=item.contentId';
 if (isset($_POST['site']) && ($_POST['site'] != -1))
 {
 	$query .= ' AND item.siteId=?';
@@ -37,8 +37,9 @@ $rows = $prepared->fetchAll();
 $index = 0;
 foreach ($rows as $row)
 {
-	$item['itemId']    = $row['id'];
-	$item['siteId']    = $row['name'];
+	$item['itemId']    = $row['itemId'];
+	$item['siteId']    = $row['siteId'];
+	$item['siteName']  = $row['name'];
 	$item['source']    = $row['source'];
 	$item['title']     = $row['title'];
 	$item['contents']  = $row['body'];

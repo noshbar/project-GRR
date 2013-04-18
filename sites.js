@@ -12,7 +12,7 @@ function addSiteToList(siteName, siteId, siteUnread)
     });
 
     var counter = $('<span>').text(' (' + siteUnread + ')');
-    counter.attr('id', 'counter' + siteName);
+    counter.attr('id', 'counter' + siteId);
     counter.attr('unreadCount', siteUnread);
 
     div.append(link);
@@ -32,8 +32,7 @@ function loadSites()
     clearContent();
     $('#sites').empty();
 
-    $.post("getSites.php",
-    function(data, status) {
+    $.post("getSites.php", function(data, status) {
         addSiteToList('All', -1, 0);
 
         var br  = $('<br>');
@@ -56,9 +55,9 @@ function loadSites()
         {
             $('#controlPanel').show();
         }
-        $('#counterAll').attr('unreadCount', totalUnread);
-        $('#counterAll').attr('lastItemId', data.lastItemId);
-        $('#counterAll').text(' (' + totalUnread + ')');
+        $('#counter-1').attr('unreadCount', totalUnread);
+        $('#counter-1').attr('lastItemId', data.lastItemId);
+        $('#counter-1').text(' (' + totalUnread + ')');
     });
 }
 

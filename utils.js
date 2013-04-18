@@ -13,7 +13,7 @@ function decreaseCount(siteName)
         var count   = counter.attr('unreadCount') - 1;
         counter.attr('unreadCount', count);
         counter.text(' (' + count + ')');
-        siteName = 'All';
+        siteName = '-1';
     }
 }
 

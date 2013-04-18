@@ -11,14 +11,19 @@ function markItem($Database, $ItemId)
 	}
 	catch(PDOException $e)
 	{
-		$result = 'addSite() Exception : '.$e->getMessage();
+		quit('markItem() Exception : '.$e->getMessage());
 	}
 }
 
 $db = openDatabase();
 $itemId = $_POST['itemId'];
+$siteId = $_POST['siteId'];
 $action = $_POST['action'];
 
 markItem($db, $itemId, $action);
+
+$result['itemId'] = $itemId;
+$result['siteId'] = $siteId;
+echo(json_encode($result));
 
 ?>
